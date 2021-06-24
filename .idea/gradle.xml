@@ -12,8 +12,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/../infake_flutter_module" />
-            <option value="$PROJECT_DIR$/../infake_flutter_module/.android/Flutter" />
+            <option value="$PROJECT_DIR$/infake_flutter_module" />
+            <option value="$PROJECT_DIR$/infake_flutter_module/.android/Flutter" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

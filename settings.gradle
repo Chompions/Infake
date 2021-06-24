@@ -2,9 +2,9 @@ include ':app'
 setBinding(new Binding([gradle: this]))
 evaluate(new File(
   settingsDir,
-  '../infake_flutter_module/.android/include_flutter.groovy'
+  'infake_flutter_module/.android/include_flutter.groovy'
 ))
 rootProject.name = "Infake"
 
 include ':infake_flutter_module'
-project(':infake_flutter_module').projectDir = new File('../infake_flutter_module')
+project(':infake_flutter_module').projectDir = new File('infake_flutter_module')
