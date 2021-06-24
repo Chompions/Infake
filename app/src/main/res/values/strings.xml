@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Infake</string>
+    <string name="contact_number">Contact Number</string>
+    <string name="contact_name">Contact Name</string>
+    <string name="schedule_call">Schedule Call</string>
+    <string name="ringtone">Ringtone</string>
+    <string name="call_screen">Call Screen</string>
+    <string name="create_profile">Create Profile</string>
+</resources>

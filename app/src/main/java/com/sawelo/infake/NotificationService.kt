@@ -1,0 +1,103 @@
+package com.sawelo.infake
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.os.Build
+import android.os.CountDownTimer
+import android.os.IBinder
+import android.util.Log
+import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
+import com.sawelo.infake.activity.CallActivity
+
+
+class NotificationService : Service() {
+
+    companion object {
+        const val CHANNEL_ID = "call_id"
+        const val CHANNEL_NAME = "Call Channel"
+        const val NOTIFICATION_ID = 2
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Create RemoteViews with custom layout
+        val customNotification = RemoteViews(
+                BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call)
+
+        // Initialize Intents
+        val defaultIntent = Intent(this, CallActivity::class.java)
+                .putExtra("route", "defaultIntent")
+        val answerIntent = Intent(this, CallActivity::class.java)
+                .putExtra("route", "answerIntent")
+        val declineIntent = Intent(this, DeclineReceiver::class.java)
+
+        // Initialize PendingIntents
+        val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(
+                this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val answerPendingIntent: PendingIntent = PendingIntent.getActivity(
+                this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val declinePendingIntent: PendingIntent = PendingIntent.getBroadcast(
+                this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        // Applying PendingIntents on buttons in customNotification
+        customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
+        customNotification.setOnClickPendingIntent(R.id.btnDecline, declinePendingIntent)
+
+        val notificationManager: NotificationManager =
+                this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create NotificationChannel only on API 26+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH)
+
+            // Set sound for channel
+            val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE), audioAttributes)
+            channel.enableVibration(true)
+
+            // Register the channel with the system
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Build Notification
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setFullScreenIntent(defaultPendingIntent, true)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(customNotification)
+                .setCustomBigContentView(customNotification)
+                .setOngoing(true)
+
+        // Countdown until NotificationService stops
+        val stopTimer = object : CountDownTimer(30000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d("NotificationService", "Countdown: $millisUntilFinished")
+            }
+            override fun onFinish() {
+                stopSelf()
+            }
+        }
+
+        stopTimer.start()
+        startForeground(NOTIFICATION_ID, builder.build())
+        return START_STICKY
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+}

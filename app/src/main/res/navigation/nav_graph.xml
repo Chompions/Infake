@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/createFragment">
+
+    <fragment
+        android:id="@+id/callFragment"
+        android:name="com.sawelo.infake.activity.CallActivity"
+        android:label="fragment_call"
+        tools:layout="@layout/activity_call" />
+    <fragment
+        android:id="@+id/createFragment"
+        android:name="com.sawelo.infake.fragment.CreateFragment"
+        android:label="fragment_create"
+        tools:layout="@layout/fragment_create" >
+        <action
+            android:id="@+id/action_createFragment_to_callFragment"
+            app:destination="@id/callFragment" />
+    </fragment>
+</navigation>
