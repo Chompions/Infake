@@ -12,10 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Infake">
-        <service
-            android:name=".function.AlarmService"
-            android:enabled="true"
-            android:exported="false"></service>
+        <service android:name=".service.FlutterStartUpService" />
+        <service android:name=".service.AlarmService" />
+        <service android:name=".service.NotificationService" />
 
         <activity android:name=".activity.CallActivity" />
         <activity android:name=".activity.MainActivity">
@@ -33,8 +32,6 @@
             android:windowSoftInputMode="adjustResize" />
 
         <receiver android:name=".DeclineReceiver" />
-
-        <service android:name=".NotificationService" />
     </application>
 
 </manifest>

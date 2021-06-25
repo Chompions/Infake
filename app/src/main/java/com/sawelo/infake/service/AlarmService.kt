@@ -1,4 +1,4 @@
-package com.sawelo.infake.function
+package com.sawelo.infake.service
 
 import android.app.*
 import android.content.Context
@@ -7,8 +7,8 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.sawelo.infake.NotificationService
 import com.sawelo.infake.R
+import com.sawelo.infake.function.SharedPrefFunction
 import java.util.*
 
 class AlarmService : Service() {
@@ -33,8 +33,12 @@ class AlarmService : Service() {
         TODO: use alarmManager.cancel(pendingIntent) to cancel a PendingIntent
          * */
 
+        Log.d("AlarmService", "Starting AlarmService")
+
         val sharedPref = SharedPrefFunction(this)
         val activeTime = "${sharedPref.activeHour}:${sharedPref.activeMinute}"
+
+        /** Create notificationManager to ensure functionality */
         val notificationManager: NotificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -58,40 +62,46 @@ class AlarmService : Service() {
 
         // TODO: Set ContentIntent to press for immediate start of call notificationService
 
-        // Create Intent & PendingIntent to start NotificationService
-        val notificationServiceIntent = Intent(this, NotificationService::class.java)
-        val notificationServicePendingIntent: PendingIntent = PendingIntent.getService(
-                this, 0, notificationServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        // Create Intent & PendingIntent to start FlutterStartUpService
+        val flutterStartUpServiceIntent = Intent(this, FlutterStartUpService::class.java)
+        val flutterStartUpServicePendingIntent: PendingIntent = PendingIntent.getService(
+            this, 0, flutterStartUpServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // Create AlarmManager
         val alarmManager: AlarmManager =
                 this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // Setting RCT_Wakeup
+        // Setting RCT_Wakeup directly to FlutterStartUpService
         fun setSpecificAlarm() {
-            Log.d("AlarmFunction", "Run setSpecificAlarm() for $activeTime")
+            Log.d("AlarmService", "Run setSpecificAlarm() for $activeTime")
             val c: Calendar = Calendar.getInstance().apply {
                 timeInMillis = System.currentTimeMillis()
                 set(Calendar.HOUR_OF_DAY, sharedPref.activeHour)
-                set(Calendar.MINUTE, sharedPref.activeMinute)
+                // set activeMinute minus 1 minute for FlutterStartUpService
+                set(Calendar.MINUTE, sharedPref.activeMinute - 1)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         c.timeInMillis,
-                        notificationServicePendingIntent)
+                        flutterStartUpServicePendingIntent)
             } else {
                 alarmManager.setExact(
                         AlarmManager.RTC_WAKEUP,
                         c.timeInMillis,
-                        notificationServicePendingIntent)
+                        flutterStartUpServicePendingIntent)
             }
 
         }
 
-        setSpecificAlarm()
         startForeground(NOTIFICATION_ID, builder.build())
+        setSpecificAlarm()
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        println("AlarmService is destroyed")
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent): IBinder {

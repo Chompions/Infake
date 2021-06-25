@@ -13,9 +13,8 @@ import com.sawelo.infake.ContactData
 import com.sawelo.infake.CreateViewModel
 import com.sawelo.infake.R
 import com.sawelo.infake.databinding.FragmentCreateBinding
-import com.sawelo.infake.function.AlarmService
-import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.SharedPrefFunction
+import com.sawelo.infake.service.AlarmService
 import java.util.*
 
 class CreateFragment : Fragment(R.layout.fragment_create) {
@@ -33,7 +32,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentCreateBinding.inflate(layoutInflater)
         return binding.root
     }
@@ -65,17 +64,6 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 sharedPref.activeName +
                 sharedPref.activeNumber +
                 sharedPref.activeRoute)
-
-        // Create FlutterEngine for warm-up before notification appears
-        val flutterClass = FlutterFunction()
-        flutterClass.createFlutterEngine(requireContext())
-        flutterClass.sendMethodCall(
-                ContactData(
-                        sharedPref.activeName,
-                        sharedPref.activeNumber,
-                        sharedPref.activeRoute,
-                ))
-        // TODO: Change FlutterEngine warm-up location to ensure it's exactly a minute prepared before firing
 
         // Start AlarmService
         val intent = Intent(requireContext(), AlarmService::class.java)

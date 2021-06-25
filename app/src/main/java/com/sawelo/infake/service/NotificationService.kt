@@ -1,4 +1,4 @@
-package com.sawelo.infake
+package com.sawelo.infake.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,6 +14,9 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import com.sawelo.infake.BuildConfig
+import com.sawelo.infake.DeclineReceiver
+import com.sawelo.infake.R
 import com.sawelo.infake.activity.CallActivity
 
 
@@ -26,9 +29,13 @@ class NotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        Log.d("NotificationService", "Starting NotificationService")
+
         // Create RemoteViews with custom layout
         val customNotification = RemoteViews(
-                BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call)
+            BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call
+        )
 
         // Initialize Intents
         val defaultIntent = Intent(this, CallActivity::class.java)
@@ -49,6 +56,7 @@ class NotificationService : Service() {
         customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
         customNotification.setOnClickPendingIntent(R.id.btnDecline, declinePendingIntent)
 
+        /** Create notificationManager to ensure functionality */
         val notificationManager: NotificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -95,6 +103,11 @@ class NotificationService : Service() {
         stopTimer.start()
         startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
+    }
+
+    override fun onDestroy() {
+        println("NotificationService is destroyed")
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

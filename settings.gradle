@@ -8,3 +8,5 @@ rootProject.name = "Infake"
 
 include ':infake_flutter_module'
 project(':infake_flutter_module').projectDir = new File('infake_flutter_module')
+
+include ':infake_flutter_module'

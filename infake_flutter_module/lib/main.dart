@@ -21,6 +21,7 @@ class _FakeCallState extends State<FakeCall> {
   String number = "FlutterDefaultNumber";
   String route = "/InitialRoute";
 
+  // Get contact data from Android
   Future _getContactDataFromAndroid() async {
     try {
       FakeCall.platform.setMethodCallHandler((call) async {
@@ -57,7 +58,7 @@ class _FakeCallState extends State<FakeCall> {
       ),
       initialRoute: "/InitialRoute",
       routes: {
-        "/InitialRoute": (context) => InitialRoute(name, number, route),
+        "/InitialRoute": (context) => InitialRoute(),
         "/WhatsAppIncomingCall": (context) => WhatsAppIncomingCall(name, number, route),
         "/WhatsAppOngoingCall": (context) => WhatsAppOngoingCall(),
       },
@@ -66,25 +67,11 @@ class _FakeCallState extends State<FakeCall> {
 }
 
 class InitialRoute extends StatelessWidget {
-  final String name;
-  final String number;
-  final String route;
-
-  InitialRoute(this.name, this.number, this.route);
-
   @override
   Widget build(BuildContext context) {
     return Material(
       child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Initial Route"),
-            Text("Name: $name"),
-            Text("Number: $number"),
-            Text("Route: $route")
-          ],
-        ),
+        color: Colors.black38,
       ),
     );
   }
