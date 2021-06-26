@@ -10,8 +10,11 @@ import com.sawelo.infake.ContactData
 import com.sawelo.infake.R
 import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.SharedPrefFunction
+import java.util.concurrent.TimeUnit
 
 class FlutterStartUpService : Service() {
+
+    private lateinit var stopTimer: CountDownTimer
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -23,23 +26,23 @@ class FlutterStartUpService : Service() {
         Log.d("FlutterStartUpService", "Active data: " +
                 "${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}")
 
+        // Create Intent to AlarmService
+        val alarmServiceIntent = Intent(this, AlarmService::class.java)
+        // Create Intent to NotificationService
+        val notificationServiceIntent = Intent(this, NotificationService::class.java)
+
         // Build Notification
         val builder = NotificationCompat.Builder(this, AlarmService.CHANNEL_ID)
             .setContentTitle("Infake")
-            .setContentText("Starting up Flutter")
+            .setContentText("Starting up...")
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_MIN)
 
-        // Create Intent to start NotificationService
-        val notificationServiceIntent = Intent(this, NotificationService::class.java)
-
-        // Create Intent to stop AlarmService
-        val alarmServiceIntent = Intent(this, AlarmService::class.java)
-
         // Countdown until FlutterStartUpService stops
-        val stopTimer = object : CountDownTimer(60000, 1000) {
+        stopTimer = object: CountDownTimer(20000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("FlutterStartUpService", "Countdown: $millisUntilFinished")
+                val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
+                Log.d("FlutterStartUpService", "Countdown: $secondsUntilFinished")
             }
             override fun onFinish() {
                 stopService(alarmServiceIntent)
@@ -61,6 +64,7 @@ class FlutterStartUpService : Service() {
     }
 
     override fun onDestroy() {
+        stopTimer.cancel()
         println("FlutterStartUpService is destroyed")
         super.onDestroy()
     }

@@ -11,7 +11,6 @@ class SharedPrefFunction(context: Context) {
         const val ACTIVE_ROUTE = "ACTIVE_ROUTE"
         const val ACTIVE_HOUR = "ACTIVE_HOUR"
         const val ACTIVE_MINUTE = "ACTIVE_MINUTE"
-
     }
     private val contactData: ContactData = ContactData()
     private val sharedPref: SharedPreferences = context.getSharedPreferences(

@@ -18,6 +18,7 @@ import com.sawelo.infake.BuildConfig
 import com.sawelo.infake.DeclineReceiver
 import com.sawelo.infake.R
 import com.sawelo.infake.activity.CallActivity
+import java.util.concurrent.TimeUnit
 
 
 class NotificationService : Service() {
@@ -27,6 +28,8 @@ class NotificationService : Service() {
         const val CHANNEL_NAME = "Call Channel"
         const val NOTIFICATION_ID = 2
     }
+
+    private lateinit var stopTimer: CountDownTimer
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -91,9 +94,10 @@ class NotificationService : Service() {
                 .setOngoing(true)
 
         // Countdown until NotificationService stops
-        val stopTimer = object : CountDownTimer(30000, 1000) {
+        stopTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("NotificationService", "Countdown: $millisUntilFinished")
+                val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
+                Log.d("NotificationService", "Countdown: $secondsUntilFinished")
             }
             override fun onFinish() {
                 stopSelf()
@@ -106,6 +110,7 @@ class NotificationService : Service() {
     }
 
     override fun onDestroy() {
+        stopTimer.cancel()
         println("NotificationService is destroyed")
         super.onDestroy()
     }

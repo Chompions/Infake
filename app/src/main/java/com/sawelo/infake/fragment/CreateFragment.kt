@@ -66,7 +66,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 sharedPref.activeRoute)
 
         // Start AlarmService
-        val intent = Intent(requireContext(), AlarmService::class.java)
-        startForegroundService(requireContext(), intent)
+        val alarmServiceIntent = Intent(requireContext(), AlarmService::class.java)
+        startForegroundService(requireContext(), alarmServiceIntent)
     }
 }

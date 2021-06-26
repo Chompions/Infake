@@ -19,6 +19,9 @@ class AlarmService : Service() {
         const val NOTIFICATION_ID = 1
     }
 
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var flutterStartUpServicePendingIntent: PendingIntent
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         /**
         Notes:
@@ -60,25 +63,25 @@ class AlarmService : Service() {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
 
-        // TODO: Set ContentIntent to press for immediate start of call notificationService
-
         // Create Intent & PendingIntent to start FlutterStartUpService
         val flutterStartUpServiceIntent = Intent(this, FlutterStartUpService::class.java)
-        val flutterStartUpServicePendingIntent: PendingIntent = PendingIntent.getService(
-            this, 0, flutterStartUpServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        flutterStartUpServicePendingIntent = PendingIntent.getService(
+            this, 0, flutterStartUpServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        // Create Intent to NotificationService
+        val notificationServiceIntent = Intent(this, NotificationService::class.java)
 
         // Create AlarmManager
-        val alarmManager: AlarmManager =
-                this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // Setting RCT_Wakeup directly to FlutterStartUpService
         fun setSpecificAlarm() {
             Log.d("AlarmService", "Run setSpecificAlarm() for $activeTime")
+            var activeMinute: Int = sharedPref.activeMinute
+            val preparingMinute: Int = if (--activeMinute > 0) --activeMinute else activeMinute
             val c: Calendar = Calendar.getInstance().apply {
                 timeInMillis = System.currentTimeMillis()
                 set(Calendar.HOUR_OF_DAY, sharedPref.activeHour)
-                // set activeMinute minus 1 minute for FlutterStartUpService
-                set(Calendar.MINUTE, sharedPref.activeMinute - 1)
+                set(Calendar.MINUTE, preparingMinute)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
@@ -94,12 +97,15 @@ class AlarmService : Service() {
 
         }
 
-        startForeground(NOTIFICATION_ID, builder.build())
+        stopService(flutterStartUpServiceIntent)
+        stopService(notificationServiceIntent)
         setSpecificAlarm()
+        startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
     }
 
     override fun onDestroy() {
+        alarmManager.cancel(flutterStartUpServicePendingIntent)
         println("AlarmService is destroyed")
         super.onDestroy()
     }

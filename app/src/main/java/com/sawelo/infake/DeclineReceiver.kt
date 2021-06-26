@@ -7,8 +7,8 @@ import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.service.NotificationService
 
 class DeclineReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-        context?.stopService(Intent(context, NotificationService::class.java))
+    override fun onReceive(context: Context, intent: Intent?) {
+        context.stopService(Intent(context, NotificationService::class.java))
         FlutterFunction().destroyFlutterEngine()
     }
 }
