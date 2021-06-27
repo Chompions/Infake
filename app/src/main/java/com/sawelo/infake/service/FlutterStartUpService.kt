@@ -39,7 +39,7 @@ class FlutterStartUpService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MIN)
 
         // Countdown until FlutterStartUpService stops
-        stopTimer = object: CountDownTimer(20000, 1000) {
+        stopTimer = object: CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
                 Log.d("FlutterStartUpService", "Countdown: $secondsUntilFinished")

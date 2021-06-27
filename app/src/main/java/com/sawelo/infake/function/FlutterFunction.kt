@@ -59,7 +59,9 @@ class FlutterFunction {
     }
 
     fun destroyFlutterEngine() {
-        flutterEngine.destroy()
-        Log.d("FlutterFunction", "FlutterEngine destroyed")
+        if (isFlutterEngineInitialized()) {
+            flutterEngine.destroy()
+            Log.d("FlutterFunction", "FlutterEngine destroyed")
+        }
     }
 }
