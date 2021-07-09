@@ -1,6 +1,5 @@
 package com.sawelo.infake.activity
 
-import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -16,6 +15,7 @@ import androidx.fragment.app.FragmentManager
 import com.sawelo.infake.ContactData
 import com.sawelo.infake.R
 import com.sawelo.infake.function.FlutterFunction
+import com.sawelo.infake.function.SharedPrefFunction
 import com.sawelo.infake.service.NotificationService
 import io.flutter.embedding.android.FlutterFragment
 
@@ -45,9 +45,8 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         this.stopService(Intent(this, NotificationService::class.java))
         Log.d("CallActivity", "Service stopped")
 
-        // Initialize wakeLock & variables
+        // Setting up display switch (on/off) during call
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
-
         setWakeLock()
         if (!useProximityWakeLock) {
             sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
@@ -55,17 +54,14 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         }
 
         // Instantiate sharedPref
-        val sharedPref = applicationContext.getSharedPreferences(
-                "PREFERENCE_FILE_KEY", Context.MODE_PRIVATE)
-        val activeName = sharedPref.getString("ACTIVE_NAME", "Default Name")
-        val activeNumber = sharedPref.getString("ACTIVE_NUMBER", "Default Number")
-        Log.d("CallActivity", "Data: $activeName, $activeNumber")
+        val sharedPref = SharedPrefFunction(this)
+        Log.d("CallActivity", "Data: ${sharedPref.activeName}, ${sharedPref.activeNumber}")
 
         fun initializeMethodCall(routeExtra: String) {
             FlutterFunction().sendMethodCall(
                 ContactData(
-                    activeName!!,
-                    activeNumber!!,
+                    sharedPref.activeName,
+                    sharedPref.activeNumber,
                     routeExtra,
                 ))
             Log.d("CallActivity", "routeExtra: $routeExtra")
@@ -78,7 +74,6 @@ class CallActivity: FragmentActivity(), SensorEventListener {
                 "answerIntent" -> initializeMethodCall("/WhatsAppOngoingCall")
             }
         }
-        Log.d("CallActivity", "intent: $route")
 
         // Get Activity's FragmentManager
         fragmentManager = supportFragmentManager
@@ -114,13 +109,24 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     private fun setWakeLock() {
+        // Set wakeLock according to phone's OS version
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            /**
+             * Proximity wakeLock is currently the best way to turn screen off from close proximity
+             * However this wakeLock can only work for buildVersion above Lollipop
+             * */
             proximityWakeLock = powerManager.newWakeLock(
                 PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "infake:proximity_wake_lock")
             proximityWakeLock.acquire(10*60*1000L)
             useProximityWakeLock = true
-        }
-         else {
+        } else {
+            /**
+             * Partial wakeLock will require additional workaround to simulate turning off screen
+             *
+             * This wakeLock will be accompanied by showSystemUI(), hideSystemUI(),
+             * onSensorChanged() with sensor of TYPE_PROXIMITY, and additionally sensor listeners
+             * in onResume() and onPause()
+             * */
             partialWakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "infake:partial_wake_lock")
             useProximityWakeLock = false
@@ -149,6 +155,17 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
+        /**
+         * onSensorChanged will only run if partialWakeLock is running and
+         * proximityWakeLock is not in use
+         *
+         * If proximity declares object is near -> then hideSystemUI, closes flutterFragment and
+         * potentially turn screen off after a certain duration
+         *
+         * Otherwise, if proximity declares object is far -> then showSystemUI and reveals
+         * flutterFragment
+         * */
+
         if (!useProximityWakeLock) {
             if (event != null && event.sensor.type == Sensor.TYPE_PROXIMITY) {
                 if (event.values[0] >= -SENSOR_SENSITIVITY && event.values[0] <= SENSOR_SENSITIVITY) {
@@ -171,8 +188,6 @@ class CallActivity: FragmentActivity(), SensorEventListener {
                             .show(flutterFragment!!)
                             .commitNow()
                     }
-                    Log.d("onSensorChanged",
-                        "currentBrightness is ${this.window.attributes.screenBrightness}")
                 }
             }
         }

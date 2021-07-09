@@ -1,9 +1,6 @@
 package com.sawelo.infake.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
@@ -93,6 +90,9 @@ class NotificationService : Service() {
                 .setCustomBigContentView(customNotification)
                 .setOngoing(true)
 
+        val buildNotification: Notification = builder.build()
+        buildNotification.flags = Notification.FLAG_INSISTENT
+
         // Countdown until NotificationService stops
         stopTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -105,7 +105,7 @@ class NotificationService : Service() {
         }
 
         stopTimer.start()
-        startForeground(NOTIFICATION_ID, builder.build())
+        startForeground(NOTIFICATION_ID, buildNotification)
         return START_STICKY
     }
 

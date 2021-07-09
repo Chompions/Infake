@@ -1,11 +1,14 @@
 package com.sawelo.infake.fragment
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,8 +21,8 @@ import com.sawelo.infake.service.AlarmService
 import java.util.*
 
 class CreateFragment : Fragment(R.layout.fragment_create) {
-    private var _binding: FragmentCreateBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var _binding: FragmentCreateBinding
+    private val binding get() = _binding
 
     /**
      * Use activityViewModels() delegate class instead of viewModels() to create shared ViewModel
@@ -44,6 +47,30 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             createFragment = this@CreateFragment
             lifecycleOwner = viewLifecycleOwner
         }
+
+        clearEditText(binding.contactName)
+        clearEditText(binding.contactNumber)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun clearEditText(appCompatEditText: AppCompatEditText) {
+        appCompatEditText.setOnTouchListener {_, event ->
+            val drawableRight = 2
+            val checkAction: Boolean = event.action == MotionEvent.ACTION_UP
+            val checkPressArea: Boolean = (
+                    event.rawX >= (appCompatEditText.right - appCompatEditText.compoundDrawables[drawableRight].bounds.width() - appCompatEditText.paddingEnd)
+                            && event.rawX <= (appCompatEditText.right - appCompatEditText.paddingEnd))
+
+            if (checkAction) {
+                if(checkPressArea) {
+                    appCompatEditText.text?.clear()
+                    return@setOnTouchListener true
+                }
+                return@setOnTouchListener false
+            } else {
+                return@setOnTouchListener false
+            }
+        }
     }
 
     fun scheduleCall() {
@@ -54,8 +81,8 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         // Put data from UI to sharedPref
         val sharedPref = SharedPrefFunction(requireContext())
         sharedPref.putStringData(ContactData(
-                binding.contactNameText.text.toString(),
-                binding.contactNumberText.text.toString(),
+                binding.contactName.text.toString(),
+                binding.contactNumber.text.toString(),
                 "/WhatsAppIncomingCall"
         ))
         // TODO: Change route input according to UI choices

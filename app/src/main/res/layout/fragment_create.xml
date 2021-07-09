@@ -14,103 +14,158 @@
             type="com.sawelo.infake.fragment.CreateFragment" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/contact_picture"
-            android:layout_width="150dp"
-            android:layout_height="200dp"
-            android:layout_margin="20dp"
-            android:src="@drawable/ic_baseline_person"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/contact_name"
-            android:layout_width="200dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/contact_name"
-            app:layout_constraintBottom_toTopOf="@id/contact_number"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/contact_picture"
-            app:layout_constraintTop_toTopOf="@+id/contact_picture"
-            app:endIconMode="clear_text">
+            android:paddingBottom="13dp"
+            android:background="@color/cream">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contact_name_text"
-                android:layout_width="match_parent"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="text"/>
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_add_profile_header"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="@string/add_profile_desc" />
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/contact_number"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/contact_number"
-            app:layout_constraintBottom_toBottomOf="@+id/contact_picture"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/contact_picture"
-            app:layout_constraintTop_toBottomOf="@+id/contact_name"
-            app:endIconMode="clear_text">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contact_number_text"
-                android:layout_width="match_parent"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button"
+                style="@style/ButtonText"
+                android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:background="@drawable/btn_use_existing_contact"
+                android:text="@string/use_existing_contact"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView2"
+                app:layout_constraintVertical_bias="0.05" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/contact_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:src="@drawable/ic_contact_picture"
+                style="?attr/borderlessButtonStyle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/button" />
 
-        <Button
-            android:id="@+id/schedule_call_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            app:layout_constraintBottom_toTopOf="@id/ringtone_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/contact_picture"
-            android:text="@{viewModel.scheduleText}"
-            android:onClick="@{() -> createFragment.scheduleCall()}"/>
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/contact_name"
+                android:layout_marginTop="13dp"
+                android:hint="@string/contact_name"
+                android:inputType="text"
+                android:drawableStart="@drawable/ic_baseline_face"
+                android:drawableEnd="@drawable/ic_baseline_cancel"
+                style="@style/ContactButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contact_picture" />
 
-        <Button
-            android:id="@+id/ringtone_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="@string/ringtone"
-            app:layout_constraintBottom_toTopOf="@id/call_screen_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/schedule_call_button" />
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/contact_number"
+                android:layout_marginTop="13dp"
+                android:hint="@string/contact_number"
+                android:inputType="phone"
+                android:drawableStart="@drawable/ic_baseline_call"
+                android:drawableEnd="@drawable/ic_baseline_cancel"
+                style="@style/ContactButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contact_name" />
 
-        <Button
-            android:id="@+id/call_screen_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="@string/call_screen"
-            app:layout_constraintBottom_toTopOf="@+id/create_profile_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ringtone_button" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/schedule_call_button"
+                android:layout_marginTop="13dp"
+                android:hint="@string/schedule_call"
+                android:text="@{viewModel.scheduleText}"
+                android:onClick="@{() -> createFragment.scheduleCall()}"
+                android:drawableStart="@drawable/ic_baseline_access_time"
+                android:drawableEnd="@drawable/ic_baseline_cancel_transparent"
+                style="@style/ContactButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contact_number" />
 
-        <Button
-            android:id="@+id/create_profile_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="@string/create_profile"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/call_screen_button"
-            android:onClick="@{() -> createFragment.createProfile()}"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/ringtone_button"
+                android:layout_marginTop="13dp"
+                android:hint="@string/ringtone"
+                android:drawableStart="@drawable/ic_baseline_music_note"
+                android:drawableEnd="@drawable/ic_baseline_cancel_transparent"
+                style="@style/ContactButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/schedule_call_button" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <HorizontalScrollView
+                android:id="@+id/call_screen_button"
+                android:layout_marginTop="13dp"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ringtone_button">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    >
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:layout_width="151dp"
+                        android:layout_height="311dp"
+                        android:layout_marginEnd="13dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/whatsappimage"
+                         />
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:layout_width="151dp"
+                        android:layout_height="311dp"
+                        android:layout_marginEnd="13dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/whatsappimage"
+                        />
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:layout_width="151dp"
+                        android:layout_height="311dp"
+                        android:layout_marginEnd="13dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/whatsappimage"
+                        />
+
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+            </HorizontalScrollView>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/create_profile_button"
+                android:layout_marginTop="13dp"
+                android:hint="@string/create_profile"
+                android:text="@string/create_profile"
+                android:textSize="24sp"
+                android:onClick="@{() -> createFragment.createProfile()}"
+                style="@style/ContactButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/call_screen_button" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
 
 </layout>

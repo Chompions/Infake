@@ -6,10 +6,8 @@ import android.os.CountDownTimer
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.sawelo.infake.ContactData
 import com.sawelo.infake.R
 import com.sawelo.infake.function.FlutterFunction
-import com.sawelo.infake.function.SharedPrefFunction
 import java.util.concurrent.TimeUnit
 
 class FlutterStartUpService : Service() {
@@ -20,11 +18,7 @@ class FlutterStartUpService : Service() {
 
         Log.d("FlutterStartUpService", "Starting FlutterStartUpService")
 
-        val sharedPref = SharedPrefFunction(this)
-
         FlutterFunction().createFlutterEngine(this)
-        Log.d("FlutterStartUpService", "Active data: " +
-                "${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}")
 
         // Create Intent to AlarmService
         val alarmServiceIntent = Intent(this, AlarmService::class.java)
@@ -47,13 +41,6 @@ class FlutterStartUpService : Service() {
             override fun onFinish() {
                 stopService(alarmServiceIntent)
                 stopSelf()
-                FlutterFunction().sendMethodCall(
-                    ContactData(
-                        sharedPref.activeName,
-                        sharedPref.activeNumber,
-                        sharedPref.activeRoute,
-                    )
-                )
                 startService(notificationServiceIntent)
             }
         }

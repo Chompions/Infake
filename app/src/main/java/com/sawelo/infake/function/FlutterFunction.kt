@@ -24,11 +24,12 @@ class FlutterFunction {
             DartExecutor.DartEntrypoint.createDefault()
         )
 
+        val sharedPref = SharedPrefFunction(context)
         sendMethodCall(
             ContactData(
-                "AndroidDefaultName",
-                "AndroidDefaultNumber",
-                "/InitialRoute",
+                sharedPref.activeName,
+                sharedPref.activeNumber,
+                sharedPref.activeRoute,
             )
         )
 
@@ -45,6 +46,9 @@ class FlutterFunction {
     }
 
     fun sendMethodCall(contactData: ContactData) {
+        // This should only be used within CallActivity and FlutterFunction
+        // to avoid redundant calls
+
         if (isFlutterEngineInitialized()) {
             MethodChannel(
                 flutterEngine.dartExecutor.binaryMessenger, "method_channel_name"
