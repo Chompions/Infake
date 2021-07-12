@@ -10,14 +10,17 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.sawelo.infake.ContactData
+import com.sawelo.infake.DeclineReceiver
 import com.sawelo.infake.R
 import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.SharedPrefFunction
 import com.sawelo.infake.service.NotificationService
 import io.flutter.embedding.android.FlutterFragment
+
 
 class CallActivity: FragmentActivity(), SensorEventListener {
 
@@ -73,6 +76,21 @@ class CallActivity: FragmentActivity(), SensorEventListener {
                 "defaultIntent" -> initializeMethodCall("/WhatsAppIncomingCall")
                 "answerIntent" -> initializeMethodCall("/WhatsAppOngoingCall")
             }
+        }
+
+        // Ensure CallActivity will run when the phone is locked or the screen is off
+        @Suppress("DEPRECATION")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                setTranslucent(true)
+            }
+        } else {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         }
 
         // Get Activity's FragmentManager
@@ -197,7 +215,9 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
+        val declineIntent = Intent(this, DeclineReceiver::class.java)
+
+        sendBroadcast(declineIntent)
         super.onDestroy()
-        FlutterFunction().destroyFlutterEngine()
     }
 }

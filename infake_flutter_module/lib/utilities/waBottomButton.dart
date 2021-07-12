@@ -1,9 +1,8 @@
+import 'package:flutter/services.dart';
 import 'package:infake_flutter_module/utilities/custom_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:infake_flutter_module/whatsAppOngoingCall.dart';
 import 'dart:async';
 import 'waMiddleButton.dart';
-import 'dart:io';
 
 class BottomButton extends StatefulWidget {
   final String name;
@@ -62,7 +61,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
       children: <Widget>[
         RawMaterialButton(
           onPressed: () {
-            Navigator.pop(context);
+            SystemNavigator.pop();
           },
           elevation: 0,
           fillColor: Color(0xFF1A2227),

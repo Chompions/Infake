@@ -23,19 +23,6 @@ class AlarmService : Service() {
     private lateinit var flutterStartUpServicePendingIntent: PendingIntent
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        /**
-        Notes:
-        use setAndAllowWhileIdle() or setExactAndAllowWhileIdle() to guarantee that the alarms will execute
-        use setInexactRepeating() to reduces number of system wake
-
-        use alarm "wakeup" version to ensure flutter warm-up can be completed in 10 seconds time frame
-
-        for interval type, use elapsed real time (ELAPSED_REALTIME_WAKEUP)
-        for specific time, use clock-based real time (RTC_WAKEUP)
-
-        TODO: use alarmManager.cancel(pendingIntent) to cancel a PendingIntent
-         * */
-
         Log.d("AlarmService", "Starting AlarmService")
 
         val sharedPref = SharedPrefFunction(this)
@@ -62,6 +49,7 @@ class AlarmService : Service() {
                 .setContentText("Preparing call for $activeTime")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setOnlyAlertOnce(true)
 
         // Create Intent & PendingIntent to start FlutterStartUpService
         val flutterStartUpServiceIntent = Intent(this, FlutterStartUpService::class.java)
@@ -76,25 +64,33 @@ class AlarmService : Service() {
         // Setting RCT_Wakeup directly to FlutterStartUpService
         fun setSpecificAlarm() {
             Log.d("AlarmService", "Run setSpecificAlarm() for $activeTime")
-            var activeMinute: Int = sharedPref.activeMinute
-            val preparingMinute: Int = if (--activeMinute > 0) --activeMinute else activeMinute
             val c: Calendar = Calendar.getInstance().apply {
                 timeInMillis = System.currentTimeMillis()
                 set(Calendar.HOUR_OF_DAY, sharedPref.activeHour)
-                set(Calendar.MINUTE, preparingMinute)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        c.timeInMillis,
-                        flutterStartUpServicePendingIntent)
-            } else {
-                alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        c.timeInMillis,
-                        flutterStartUpServicePendingIntent)
+                set(Calendar.MINUTE, sharedPref.activeMinute)
             }
 
+            /**
+             * while setAndAllowWhileIdle() or setExactAndAllowWhileIdle() was meant
+             * to guarantee alarms execution, should be noted it's not exact while in
+             * idle mode, it runs only in every 15 minutes
+             *
+             * To avoid Doze mode, use setAlarmClock()
+             * */
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                alarmManager.setAlarmClock(
+                    AlarmManager.AlarmClockInfo(
+                        c.timeInMillis,
+                        flutterStartUpServicePendingIntent),
+                    flutterStartUpServicePendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    c.timeInMillis,
+                    flutterStartUpServicePendingIntent)
+            }
         }
 
         stopService(flutterStartUpServiceIntent)

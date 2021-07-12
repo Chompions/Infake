@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import com.sawelo.infake.BuildConfig
 import com.sawelo.infake.DeclineReceiver
 import com.sawelo.infake.R
@@ -65,15 +66,20 @@ class NotificationService : Service() {
             val channel = NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH)
+                    NotificationManager.IMPORTANCE_HIGH).apply {
+
+            }
 
             // Set sound for channel
             val audioAttributes = AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
-            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE), audioAttributes)
-            channel.enableVibration(true)
+
+            channel.apply {
+                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE), audioAttributes)
+                enableVibration(true)
+            }
 
             // Register the channel with the system
             notificationManager.createNotificationChannel(channel)
@@ -89,9 +95,12 @@ class NotificationService : Service() {
                 .setCustomContentView(customNotification)
                 .setCustomBigContentView(customNotification)
                 .setOngoing(true)
+                .setVisibility(VISIBILITY_PUBLIC)
+                .setVibrate(longArrayOf(0, 250, 1000, 250, 1000))
 
-        val buildNotification: Notification = builder.build()
-        buildNotification.flags = Notification.FLAG_INSISTENT
+        val buildNotification: Notification = builder.build().apply {
+            this.flags = Notification.FLAG_INSISTENT
+        }
 
         // Countdown until NotificationService stops
         stopTimer = object : CountDownTimer(10000, 1000) {
@@ -105,7 +114,7 @@ class NotificationService : Service() {
         }
 
         stopTimer.start()
-        startForeground(NOTIFICATION_ID, buildNotification)
+        notificationManager.notify(NOTIFICATION_ID, buildNotification)
         return START_STICKY
     }
 
