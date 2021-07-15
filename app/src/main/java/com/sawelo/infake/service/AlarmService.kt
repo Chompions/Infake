@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.sawelo.infake.R
+import com.sawelo.infake.function.IntentFunction
 import com.sawelo.infake.function.SharedPrefFunction
 import java.util.*
 
@@ -26,11 +27,8 @@ class AlarmService : Service() {
         Log.d("AlarmService", "Starting AlarmService")
 
         val sharedPref = SharedPrefFunction(this)
+        val intentFunction = IntentFunction(this)
         val activeTime = "${sharedPref.activeHour}:${sharedPref.activeMinute}"
-
-        /** Create notificationManager to ensure functionality */
-        val notificationManager: NotificationManager =
-                this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -40,7 +38,7 @@ class AlarmService : Service() {
                     NotificationManager.IMPORTANCE_MIN)
 
             // Register the channel with the system
-            notificationManager.createNotificationChannel(channel)
+            intentFunction.notificationManager.createNotificationChannel(channel)
         }
 
         // Build Notification
@@ -50,13 +48,12 @@ class AlarmService : Service() {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setOnlyAlertOnce(true)
+                .addAction(R.drawable.ic_baseline_cancel, "Cancel",
+                    intentFunction.declinePendingIntent)
 
         // Create Intent & PendingIntent to start FlutterStartUpService
-        val flutterStartUpServiceIntent = Intent(this, FlutterStartUpService::class.java)
         flutterStartUpServicePendingIntent = PendingIntent.getService(
-            this, 0, flutterStartUpServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        // Create Intent to NotificationService
-        val notificationServiceIntent = Intent(this, NotificationService::class.java)
+            this, 0, intentFunction.flutterStartUpServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         // Create AlarmManager
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -93,8 +90,7 @@ class AlarmService : Service() {
             }
         }
 
-        stopService(flutterStartUpServiceIntent)
-        stopService(notificationServiceIntent)
+        intentFunction.cancelCall()
         setSpecificAlarm()
         startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
@@ -102,7 +98,7 @@ class AlarmService : Service() {
 
     override fun onDestroy() {
         alarmManager.cancel(flutterStartUpServicePendingIntent)
-        println("AlarmService is destroyed")
+        Log.d("Destroy", "AlarmService is destroyed")
         super.onDestroy()
     }
 

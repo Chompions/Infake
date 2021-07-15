@@ -14,10 +14,10 @@ import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.sawelo.infake.ContactData
-import com.sawelo.infake.DeclineReceiver
 import com.sawelo.infake.R
 import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.SharedPrefFunction
+import com.sawelo.infake.service.DeclineService
 import com.sawelo.infake.service.NotificationService
 import io.flutter.embedding.android.FlutterFragment
 
@@ -215,7 +215,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
-        val declineIntent = Intent(this, DeclineReceiver::class.java)
+        val declineIntent = Intent(this, DeclineService::class.java)
 
         sendBroadcast(declineIntent)
         super.onDestroy()

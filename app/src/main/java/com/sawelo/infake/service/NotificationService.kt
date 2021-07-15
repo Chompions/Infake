@@ -1,7 +1,6 @@
 package com.sawelo.infake.service
 
 import android.app.*
-import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
@@ -13,9 +12,9 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import com.sawelo.infake.BuildConfig
-import com.sawelo.infake.DeclineReceiver
 import com.sawelo.infake.R
 import com.sawelo.infake.activity.CallActivity
+import com.sawelo.infake.function.IntentFunction
 import java.util.concurrent.TimeUnit
 
 
@@ -33,6 +32,8 @@ class NotificationService : Service() {
 
         Log.d("NotificationService", "Starting NotificationService")
 
+        val intentFunction = IntentFunction(this)
+
         // Create RemoteViews with custom layout
         val customNotification = RemoteViews(
             BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call
@@ -43,23 +44,19 @@ class NotificationService : Service() {
                 .putExtra("route", "defaultIntent")
         val answerIntent = Intent(this, CallActivity::class.java)
                 .putExtra("route", "answerIntent")
-        val declineIntent = Intent(this, DeclineReceiver::class.java)
+        val declineIntent = Intent(this, DeclineService::class.java)
 
         // Initialize PendingIntents
         val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val answerPendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val declinePendingIntent: PendingIntent = PendingIntent.getBroadcast(
+        val declinePendingIntent: PendingIntent = PendingIntent.getService(
                 this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // Applying PendingIntents on buttons in customNotification
         customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
         customNotification.setOnClickPendingIntent(R.id.btnDecline, declinePendingIntent)
-
-        /** Create notificationManager to ensure functionality */
-        val notificationManager: NotificationManager =
-                this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -82,7 +79,7 @@ class NotificationService : Service() {
             }
 
             // Register the channel with the system
-            notificationManager.createNotificationChannel(channel)
+            intentFunction.notificationManager.createNotificationChannel(channel)
         }
 
         // Build Notification
@@ -103,24 +100,24 @@ class NotificationService : Service() {
         }
 
         // Countdown until NotificationService stops
-        stopTimer = object : CountDownTimer(10000, 1000) {
+        stopTimer = object : CountDownTimer(25000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
                 Log.d("NotificationService", "Countdown: $secondsUntilFinished")
             }
             override fun onFinish() {
-                stopSelf()
+                intentFunction.cancelCall(destroyAlarmService = true)
             }
         }
 
         stopTimer.start()
-        notificationManager.notify(NOTIFICATION_ID, buildNotification)
+        intentFunction.notificationManager.notify(NOTIFICATION_ID, buildNotification)
         return START_STICKY
     }
 
     override fun onDestroy() {
         stopTimer.cancel()
-        println("NotificationService is destroyed")
+        Log.d("Destroy", "NotificationService is destroyed")
         super.onDestroy()
     }
 
