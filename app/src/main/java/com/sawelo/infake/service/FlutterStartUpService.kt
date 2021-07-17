@@ -28,7 +28,7 @@ class FlutterStartUpService : Service() {
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .addAction(R.drawable.ic_baseline_cancel, "Cancel",
-                intentFunction.declinePendingIntent)
+                intentFunction.callDeclineService(System.currentTimeMillis().toInt()))
 
         // Countdown until FlutterStartUpService stops
         stopTimer = object: CountDownTimer(10000, 1000) {

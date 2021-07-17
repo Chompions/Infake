@@ -7,7 +7,7 @@ import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.sawelo.infake.R
 import com.sawelo.infake.fragment.CreateFragment
-import com.sawelo.infake.function.FlutterFunction
+import com.sawelo.infake.function.IntentFunction
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        IntentFunction(this).cancelCall(destroyAlarmService = true)
         super.onDestroy()
-        FlutterFunction().destroyFlutterEngine()
     }
 }

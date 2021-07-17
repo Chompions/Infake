@@ -44,14 +44,14 @@ class NotificationService : Service() {
                 .putExtra("route", "defaultIntent")
         val answerIntent = Intent(this, CallActivity::class.java)
                 .putExtra("route", "answerIntent")
-        val declineIntent = Intent(this, DeclineService::class.java)
+        val declineIntent = Intent(this, DeclineBroadcast::class.java)
 
         // Initialize PendingIntents
         val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val answerPendingIntent: PendingIntent = PendingIntent.getActivity(
                 this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val declinePendingIntent: PendingIntent = PendingIntent.getService(
+        val declinePendingIntent: PendingIntent = PendingIntent.getBroadcast(
                 this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         // Applying PendingIntents on buttons in customNotification

@@ -21,8 +21,8 @@ import com.sawelo.infake.service.AlarmService
 import java.util.*
 
 class CreateFragment : Fragment(R.layout.fragment_create) {
-    private lateinit var _binding: FragmentCreateBinding
-    private val binding get() = _binding
+    private var _binding: FragmentCreateBinding? = null
+    private val binding get() = _binding!!
 
     /**
      * Use activityViewModels() delegate class instead of viewModels() to create shared ViewModel
@@ -52,6 +52,11 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         clearEditText(binding.contactNumber)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     fun clearEditText(appCompatEditText: AppCompatEditText) {
         appCompatEditText.setOnTouchListener {_, event ->
@@ -74,7 +79,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
     }
 
     fun scheduleCall() {
-        ScheduleFragment().show(requireActivity().supportFragmentManager, "timePicker")
+        ScheduleMenuFragment().show(parentFragmentManager, "ScheduleMenuFragment")
     }
 
     fun createProfile() {

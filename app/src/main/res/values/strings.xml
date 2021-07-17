@@ -8,4 +8,10 @@
     <string name="create_profile">Create Profile</string>
     <string name="use_existing_contact">Use existing contact</string>
     <string name="add_profile_desc">Add profile header</string>
+    <string name="schedule_text">Schedule Call</string>
+    <string name="now">Now</string>
+    <string name="_2_minutes">2 minutes</string>
+    <string name="_5_minutes">5 minutes</string>
+    <string name="_10_minutes">10 minutes</string>
+    <string name="custom_time">Custom time</string>
 </resources>

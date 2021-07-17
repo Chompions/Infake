@@ -9,8 +9,17 @@ class SharedPrefFunction(context: Context) {
         const val ACTIVE_NAME = "ACTIVE_NAME"
         const val ACTIVE_NUMBER = "ACTIVE_NUMBER"
         const val ACTIVE_ROUTE = "ACTIVE_ROUTE"
-        const val ACTIVE_HOUR = "ACTIVE_HOUR"
-        const val ACTIVE_MINUTE = "ACTIVE_MINUTE"
+
+        const val SPECIFIC_HOUR = "SPECIFIC_HOUR"
+        const val SPECIFIC_MINUTE = "SPECIFIC_MINUTE"
+
+        const val RELATIVE_HOUR = "RELATIVE_HOUR"
+        const val RELATIVE_MINUTE = "RELATIVE_MINUTE"
+        const val RELATIVE_SECOND = "RELATIVE_SECOND"
+
+        const val TIMER_TYPE = "TIMER_TYPE"
+
+        const val SCHEDULE_TEXT = "SCHEDULE_TEXT"
     }
     private val contactData: ContactData = ContactData()
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
@@ -23,8 +32,16 @@ class SharedPrefFunction(context: Context) {
     val activeNumber = sharedPref.getString(ACTIVE_NUMBER, contactData.number) ?: contactData.number
     val activeRoute = sharedPref.getString(ACTIVE_ROUTE, contactData.route) ?: contactData.route
 
-    val activeHour = sharedPref.getInt(ACTIVE_HOUR, 0)
-    val activeMinute = sharedPref.getInt(ACTIVE_MINUTE, 0)
+    val specificHour = sharedPref.getInt(SPECIFIC_HOUR, 0)
+    val specificMinute = sharedPref.getInt(SPECIFIC_MINUTE, 0)
+
+    val relativeHour = sharedPref.getInt(RELATIVE_HOUR, 0)
+    val relativeMinute = sharedPref.getInt(RELATIVE_MINUTE, 0)
+    val relativeSecond = sharedPref.getInt(RELATIVE_SECOND, 0)
+
+    val timerType = sharedPref.getBoolean(TIMER_TYPE, true)
+
+    val scheduleText = sharedPref.getString(SCHEDULE_TEXT, "Schedule Call")
 
     // Check if string is blank as in -> ""
     private fun checkBlank(input: String, default: String): String {

@@ -5,7 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.sawelo.infake.service.AlarmService
-import com.sawelo.infake.service.DeclineService
+import com.sawelo.infake.service.DeclineBroadcast
 import com.sawelo.infake.service.FlutterStartUpService
 import com.sawelo.infake.service.NotificationService
 
@@ -20,9 +20,13 @@ class IntentFunction (context: Context) {
     val notificationServiceIntent = Intent(mContext, NotificationService::class.java)
     private val alarmServiceIntent = Intent(mContext, AlarmService::class.java)
 
-    private val declineIntent = Intent(mContext, DeclineService::class.java)
-    val declinePendingIntent: PendingIntent = PendingIntent.getService(
-        context, 0, declineIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+    fun callDeclineService(requestCode: Int): PendingIntent {
+        println(requestCode)
+        val declineIntent = Intent(mContext, DeclineBroadcast::class.java)
+        return PendingIntent.getBroadcast(
+            mContext, requestCode, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
 
     fun cancelCall(destroyFlutterEngine: Boolean = true, destroyAlarmService: Boolean = false) {
         notificationManager.cancel(AlarmService.NOTIFICATION_ID)
@@ -30,8 +34,8 @@ class IntentFunction (context: Context) {
 
         mContext.stopService(notificationServiceIntent)
         mContext.stopService(flutterStartUpServiceIntent)
-        if (destroyFlutterEngine) {FlutterFunction().destroyFlutterEngine()}
         if (destroyAlarmService) { mContext.stopService(alarmServiceIntent) }
+        if (destroyFlutterEngine) {FlutterFunction().destroyFlutterEngine()}
     }
 
 }

@@ -5,12 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.sawelo.infake.R
 import com.sawelo.infake.function.IntentFunction
 import com.sawelo.infake.function.SharedPrefFunction
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class AlarmService : Service() {
 
@@ -24,11 +26,11 @@ class AlarmService : Service() {
     private lateinit var flutterStartUpServicePendingIntent: PendingIntent
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         Log.d("AlarmService", "Starting AlarmService")
 
         val sharedPref = SharedPrefFunction(this)
         val intentFunction = IntentFunction(this)
-        val activeTime = "${sharedPref.activeHour}:${sharedPref.activeMinute}"
 
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -44,12 +46,12 @@ class AlarmService : Service() {
         // Build Notification
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Infake")
-                .setContentText("Preparing call for $activeTime")
+                .setContentText("Preparing call for ${sharedPref.scheduleText}")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
                 .setOnlyAlertOnce(true)
                 .addAction(R.drawable.ic_baseline_cancel, "Cancel",
-                    intentFunction.declinePendingIntent)
+                    intentFunction.callDeclineService(System.currentTimeMillis().toInt()))
 
         // Create Intent & PendingIntent to start FlutterStartUpService
         flutterStartUpServicePendingIntent = PendingIntent.getService(
@@ -60,11 +62,11 @@ class AlarmService : Service() {
 
         // Setting RCT_Wakeup directly to FlutterStartUpService
         fun setSpecificAlarm() {
-            Log.d("AlarmService", "Run setSpecificAlarm() for $activeTime")
+            Log.d("AlarmService", "Run setSpecificAlarm() for ${sharedPref.scheduleText}")
             val c: Calendar = Calendar.getInstance().apply {
                 timeInMillis = System.currentTimeMillis()
-                set(Calendar.HOUR_OF_DAY, sharedPref.activeHour)
-                set(Calendar.MINUTE, sharedPref.activeMinute)
+                set(Calendar.HOUR_OF_DAY, sharedPref.specificHour)
+                set(Calendar.MINUTE, sharedPref.specificMinute)
             }
 
             /**
@@ -90,8 +92,39 @@ class AlarmService : Service() {
             }
         }
 
+        // Setting ELAPSED_REALTIME_WAKEUP directly to FlutterStartUpService
+        fun setRelativeAlarm() {
+            Log.d("AlarmService", "Run setRelativeAlarm() for ${sharedPref.scheduleText}")
+
+            val assignedHour: Long = TimeUnit.HOURS.toMillis(sharedPref.relativeHour.toLong())
+            val assignedMinute: Long = TimeUnit.MINUTES.toMillis(sharedPref.relativeMinute.toLong())
+            val assignedSecond: Long = TimeUnit.SECONDS.toMillis(sharedPref.relativeSecond.toLong())
+            val assignedEntireMillis: Long = assignedHour + assignedMinute + assignedSecond
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + assignedEntireMillis,
+                    flutterStartUpServicePendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + assignedEntireMillis,
+                    flutterStartUpServicePendingIntent
+                )
+            }
+        }
+
+        // Cancel everything before starting alarm
         intentFunction.cancelCall()
-        setSpecificAlarm()
+
+        // Determine which alarm to set according to user choice
+        if (sharedPref.timerType) {
+            setRelativeAlarm()
+        } else {
+            setSpecificAlarm()
+        }
         startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
     }

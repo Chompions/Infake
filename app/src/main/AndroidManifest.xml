@@ -14,6 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Infake">
+
+        <receiver
+            android:name=".service.DeclineBroadcast"
+            android:enabled="true"/>
+
         <service android:name=".service.FlutterStartUpService" />
         <service android:name=".service.AlarmService" />
         <service android:name=".service.NotificationService" />
@@ -22,6 +27,7 @@
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="275dp"
+        android:layout_height="315dp">
+        <TextView
+            android:id="@+id/relativeTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="15dp"
+            android:textColorHint="@color/white"
+            android:gravity="center"
+            android:textSize="60sp"
+            android:textColor="@color/white"
+            android:background="@color/blue_mid"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+            <NumberPicker
+                android:id="@+id/relativeTimeHour"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content" />
+            <NumberPicker
+                android:id="@+id/relativeTimeMinute"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content" />
+            <NumberPicker
+                android:id="@+id/relativeTimeSecond"
+                android:layout_width="75dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>
