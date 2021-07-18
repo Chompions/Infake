@@ -21,7 +21,6 @@ class IntentFunction (context: Context) {
     private val alarmServiceIntent = Intent(mContext, AlarmService::class.java)
 
     fun callDeclineService(requestCode: Int): PendingIntent {
-        println(requestCode)
         val declineIntent = Intent(mContext, DeclineBroadcast::class.java)
         return PendingIntent.getBroadcast(
             mContext, requestCode, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT

@@ -9,6 +9,7 @@ import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.sawelo.infake.CreateViewModel
+import com.sawelo.infake.MenuData
 import com.sawelo.infake.databinding.DialogSpecificScheduleBinding
 import java.util.*
 
@@ -40,7 +41,11 @@ class ScheduleSpecificFragment : DialogFragment(), TimePicker.OnTimeChangedListe
                     parentFragmentManager, "ScheduleRelativeFragment")
             }
             .setPositiveButton("Ok") { _, _ ->
-                model.setSpecificTime(requireContext())
+                model.mainSetTime(requireContext(), MenuData(
+                    timerType = false,
+                    hour = model.specificHourNum.value,
+                    minute = model.specificMinuteNum.value
+                ))
                 model.dismissMenuDialog(fragment = this@ScheduleSpecificFragment)
                 dialog?.dismiss()
             }

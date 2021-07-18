@@ -87,7 +87,7 @@
                 android:id="@+id/schedule_call_button"
                 android:layout_marginTop="13dp"
                 android:hint="@string/schedule_call"
-                android:text="@{viewModel.scheduleText}"
+                android:text="@{viewModel.mainScheduleText}"
                 android:onClick="@{() -> createFragment.scheduleCall()}"
                 android:drawableStart="@drawable/ic_baseline_access_time"
                 android:drawableEnd="@drawable/ic_baseline_cancel_transparent"

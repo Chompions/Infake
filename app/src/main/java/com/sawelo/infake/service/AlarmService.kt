@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.CountDownTimer
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
@@ -24,6 +25,8 @@ class AlarmService : Service() {
 
     private lateinit var alarmManager: AlarmManager
     private lateinit var flutterStartUpServicePendingIntent: PendingIntent
+    private lateinit var stopTimer: CountDownTimer
+    private lateinit var builder: NotificationCompat.Builder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -44,7 +47,7 @@ class AlarmService : Service() {
         }
 
         // Build Notification
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        builder = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Infake")
                 .setContentText("Preparing call for ${sharedPref.scheduleText}")
                 .setSmallIcon(R.drawable.ic_notification)
@@ -90,7 +93,11 @@ class AlarmService : Service() {
                     c.timeInMillis,
                     flutterStartUpServicePendingIntent)
             }
+
+            startForeground(NOTIFICATION_ID, builder.build())
         }
+
+        builder.setContentText("Tratata end")
 
         // Setting ELAPSED_REALTIME_WAKEUP directly to FlutterStartUpService
         fun setRelativeAlarm() {
@@ -101,19 +108,48 @@ class AlarmService : Service() {
             val assignedSecond: Long = TimeUnit.SECONDS.toMillis(sharedPref.relativeSecond.toLong())
             val assignedEntireMillis: Long = assignedHour + assignedMinute + assignedSecond
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + assignedEntireMillis,
-                    flutterStartUpServicePendingIntent
-                )
-            } else {
-                alarmManager.setExact(
-                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + assignedEntireMillis,
-                    flutterStartUpServicePendingIntent
-                )
+            val oneMinuteMillis: Long = TimeUnit.MINUTES.toMillis(1)
+
+            // Countdown until FlutterStartUpService starts
+            stopTimer = object: CountDownTimer(
+                assignedEntireMillis,
+                oneMinuteMillis) {
+                var activeHour: Int = sharedPref.relativeHour
+                var activeMinute: Int = sharedPref.relativeMinute
+
+                override fun onTick(millisUntilFinished: Long) {
+                    val text = when {
+                        (activeHour == 0 && activeMinute > 1) -> "Incoming call in $activeMinute minutes"
+                        (activeHour == 0 && activeMinute == 1) -> "Incoming call in 1 minute"
+                        else -> "Preparing call for ${sharedPref.scheduleText}"
+                    }
+
+                    if (activeHour != 0 && activeMinute == 0) { --activeHour }
+
+                    // Minus one minute every minute
+                    --activeMinute
+                    builder.setContentText(text)
+                    Log.d("AlarmService", "Timer: $text")
+
+                    startForeground(NOTIFICATION_ID, builder.build())
+                }
+
+                override fun onFinish() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime(),
+                            flutterStartUpServicePendingIntent
+                        )
+                    } else {
+                        alarmManager.setExact(
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime(),
+                            flutterStartUpServicePendingIntent)
+                    }
+                }
             }
+            stopTimer.start()
         }
 
         // Cancel everything before starting alarm
@@ -125,12 +161,12 @@ class AlarmService : Service() {
         } else {
             setSpecificAlarm()
         }
-        startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
     }
 
     override fun onDestroy() {
         alarmManager.cancel(flutterStartUpServicePendingIntent)
+        stopTimer.cancel()
         Log.d("Destroy", "AlarmService is destroyed")
         super.onDestroy()
     }

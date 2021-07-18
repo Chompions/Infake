@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.sawelo.infake.CreateViewModel
+import com.sawelo.infake.MenuData
 import com.sawelo.infake.databinding.DialogRelativeScheduleBinding
 
 
@@ -28,6 +29,10 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
         binding.relativeTimeMinute.maxValue = 60
         binding.relativeTimeSecond.maxValue = 60
 
+        binding.relativeTimeHour.value = model.relativeHourNum.value?: 0
+        binding.relativeTimeMinute.value = model.relativeMinuteNum.value?: 0
+        binding.relativeTimeSecond.value = model.relativeSecondNum.value?: 0
+
         binding.relativeTimeHour.setOnValueChangedListener(this)
         binding.relativeTimeMinute.setOnValueChangedListener(this)
         binding.relativeTimeSecond.setOnValueChangedListener(this)
@@ -46,7 +51,12 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
                 )
             }
             .setPositiveButton("Ok") { _, _ ->
-                model.setRelativeTime(requireContext())
+                model.mainSetTime(requireContext(), MenuData(
+                    timerType = true,
+                    hour = model.relativeHourNum.value,
+                    minute = model.relativeMinuteNum.value,
+                    second = model.relativeSecondNum.value
+                ))
                 model.dismissMenuDialog(fragment = this@ScheduleRelativeFragment)
                 dialog?.dismiss()
             }

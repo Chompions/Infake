@@ -9,7 +9,7 @@ import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
-class FlutterFunction {
+class FlutterFunction{
     companion object {
         private var flutterEngine:FlutterEngine? = null
 //        fun isFlutterEngineInitialized() = Companion::flutterEngine.isInitialized
@@ -63,6 +63,7 @@ class FlutterFunction {
     }
 
     fun destroyFlutterEngine() {
+
         if (flutterEngine != null) {
             flutterEngine?.destroy()
             flutterEngine = null
