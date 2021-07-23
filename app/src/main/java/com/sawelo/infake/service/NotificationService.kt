@@ -44,7 +44,7 @@ class NotificationService : Service() {
                 .putExtra("route", "defaultIntent")
         val answerIntent = Intent(this, CallActivity::class.java)
                 .putExtra("route", "answerIntent")
-        val declineIntent = Intent(this, DeclineBroadcast::class.java)
+        val declineIntent = Intent(this, DeclineReceiver::class.java)
 
         // Initialize PendingIntents
         val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(

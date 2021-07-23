@@ -6,10 +6,11 @@ import android.content.Intent
 import android.util.Log
 import com.sawelo.infake.function.IntentFunction
 
-class DeclineBroadcast : BroadcastReceiver() {
+class DeclineReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("DeclineBroadcast", "Starting DeclineBroadcast")
-        IntentFunction(context).cancelCall(destroyAlarmService = true)
+        Log.d("DeclineReceiver", "Starting DeclineReceiver")
+        IntentFunction(context).cancelCall(
+            destroyAlarmService = true)
     }
 }

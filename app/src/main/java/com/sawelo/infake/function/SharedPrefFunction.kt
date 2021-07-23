@@ -3,6 +3,7 @@ package com.sawelo.infake.function
 import android.content.Context
 import android.content.SharedPreferences
 import com.sawelo.infake.ContactData
+import com.sawelo.infake.ScheduleData
 
 class SharedPrefFunction(context: Context) {
     companion object {
@@ -20,6 +21,7 @@ class SharedPrefFunction(context: Context) {
         const val TIMER_TYPE = "TIMER_TYPE"
 
         const val SCHEDULE_TEXT = "SCHEDULE_TEXT"
+        const val NOTIFICATION_TEXT = "NOTIFICATION_TEXT"
     }
     private val contactData: ContactData = ContactData()
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
@@ -42,6 +44,14 @@ class SharedPrefFunction(context: Context) {
     val timerType = sharedPref.getBoolean(TIMER_TYPE, true)
 
     val scheduleText = sharedPref.getString(SCHEDULE_TEXT, "Schedule Call")
+    val notificationText = sharedPref.getString(NOTIFICATION_TEXT, "Preparing call")
+
+    val scheduleData: ScheduleData =
+        if (timerType) {
+            ScheduleData(true, relativeHour, relativeMinute, relativeSecond)
+        } else {
+            ScheduleData(false, specificHour, specificMinute)
+    }
 
     // Check if string is blank as in -> ""
     private fun checkBlank(input: String, default: String): String {

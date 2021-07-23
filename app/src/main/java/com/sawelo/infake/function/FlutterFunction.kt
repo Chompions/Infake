@@ -63,7 +63,6 @@ class FlutterFunction{
     }
 
     fun destroyFlutterEngine() {
-
         if (flutterEngine != null) {
             flutterEngine?.destroy()
             flutterEngine = null

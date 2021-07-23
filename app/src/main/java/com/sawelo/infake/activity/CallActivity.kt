@@ -134,7 +134,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
              * However this wakeLock can only work for buildVersion above Lollipop
              * */
             proximityWakeLock = powerManager.newWakeLock(
-                PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "infake:proximity_wake_lock")
+                PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "infake::proximity_wake_lock")
             proximityWakeLock.acquire(10*60*1000L)
             useProximityWakeLock = true
         } else {
@@ -146,7 +146,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
              * in onResume() and onPause()
              * */
             partialWakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "infake:partial_wake_lock")
+                PowerManager.PARTIAL_WAKE_LOCK, "infake::partial_wake_lock")
             useProximityWakeLock = false
         }
     }
@@ -166,9 +166,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
 
     @Suppress("DEPRECATION")
     fun showSystemUI() {
-        if (partialWakeLock.isHeld) {
-            partialWakeLock.release()
-        }
+        if (partialWakeLock.isHeld) {partialWakeLock.release()}
         window.decorView.systemUiVisibility = 0
     }
 
@@ -215,6 +213,8 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
+        if (!useProximityWakeLock) { sensorManager.unregisterListener(this) }
+        if (partialWakeLock.isHeld) {partialWakeLock.release()}
         IntentFunction(this).cancelCall(destroyAlarmService = true)
         super.onDestroy()
     }

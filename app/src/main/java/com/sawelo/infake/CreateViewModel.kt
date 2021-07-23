@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import com.sawelo.infake.databinding.DialogMenuScheduleBinding
 import com.sawelo.infake.databinding.DialogRelativeScheduleBinding
 import com.sawelo.infake.function.SharedPrefFunction
-import java.util.*
+import com.sawelo.infake.function.UpdateTextFunction
 
 class CreateViewModel : ViewModel() {
     private val _mainScheduleText = MutableLiveData<String>()
@@ -33,7 +33,7 @@ class CreateViewModel : ViewModel() {
 
     private val _isTimerType = MutableLiveData<Boolean>()
 
-    private val _menuArray = MutableLiveData<List<MenuData>>()
+    private val _menuArray = MutableLiveData<List<ScheduleData>>()
 
     init {
         _mainScheduleText.value = "Schedule Call"
@@ -49,13 +49,14 @@ class CreateViewModel : ViewModel() {
         _isTimerType.value = true
 
         _menuArray.value = mutableListOf(
-            MenuData(true, minute = 0),
-            MenuData(true, minute = 2),
-            MenuData(true, minute = 5),
-            MenuData(true, minute = 10)
+            ScheduleData(true, minute = 0),
+            ScheduleData(true, minute = 2),
+            ScheduleData(true, minute = 5),
+            ScheduleData(true, minute = 10)
         )
     }
 
+    // Set text for each button in ScheduleMenuFragment
     fun menuButton(
         context: Context,
         fragment: Fragment,
@@ -72,16 +73,27 @@ class CreateViewModel : ViewModel() {
                 mainSetTime(context, menuData)
                 dismissMenuDialog(fragment)
             }
-            button.text = mainUpdateText(context, menuData, withSharedPref = false)
+            button.text = updateMainValues(context, menuData, updateSharedPref = false)
         }
     }
 
-    fun mainSetTime(context: Context, menuData: MenuData) {
-        val hour: Int = menuData.hour ?: 0
-        val minute: Int = menuData.minute ?: 0
-        val second: Int = menuData.second ?: 0
+    // Function for dismissing ScheduleMenuFragment
+    fun dismissMenuDialog(fragment: Fragment) {
+        val prevFragment = fragment.parentFragmentManager
+            .findFragmentByTag("ScheduleMenuFragment")
+        if (prevFragment != null) {
+            val prevDialog = prevFragment as DialogFragment
+            prevDialog.dismiss()
+        }
+    }
 
-        if (menuData.timerType == true) {
+    // Update sharedPref time settings & run mainUpdateText function
+    fun mainSetTime(context: Context, scheduleData: ScheduleData) {
+        val hour: Int = scheduleData.hour ?: 0
+        val minute: Int = scheduleData.minute ?: 0
+        val second: Int = scheduleData.second ?: 0
+
+        if (scheduleData.timerType == true) {
             val sharedPref = SharedPrefFunction(context)
             with(sharedPref.editor) {
                 putInt(SharedPrefFunction.RELATIVE_HOUR, hour)
@@ -90,7 +102,7 @@ class CreateViewModel : ViewModel() {
                 putBoolean(SharedPrefFunction.TIMER_TYPE, true)
                 apply()
             }
-            mainUpdateText(context, menuData)
+            updateMainValues(context, scheduleData)
         } else {
             val sharedPref = SharedPrefFunction(context)
             with(sharedPref.editor) {
@@ -99,10 +111,11 @@ class CreateViewModel : ViewModel() {
                 putBoolean(SharedPrefFunction.TIMER_TYPE, false)
                 apply()
             }
-            mainUpdateText(context, menuData)
+            updateMainValues(context, scheduleData)
         }
     }
 
+    // Update relativeTime values & set text for ScheduleRelativeFragment UI view
     fun updateRelativeTime(
         picker: NumberPicker?,
         binding: DialogRelativeScheduleBinding,
@@ -128,98 +141,20 @@ class CreateViewModel : ViewModel() {
         }
     }
 
+    // Update specificTime values
     fun updateSpecificTime(hourOfDay: Int, minute: Int) {
         _specificHourNum.value = hourOfDay
         _specificMinuteNum.value = minute
     }
 
-    fun dismissMenuDialog(fragment: Fragment) {
-        val prevFragment = fragment.parentFragmentManager
-            .findFragmentByTag("ScheduleMenuFragment")
-        if (prevFragment != null) {
-            val prevDialog = prevFragment as DialogFragment
-            prevDialog.dismiss()
-        }
-    }
+    private fun updateMainValues(
+        context: Context,
+        scheduleData: ScheduleData,
+        updateSharedPref: Boolean = true): String {
 
-    private fun mainUpdateText(context: Context, menuData: MenuData, withSharedPref: Boolean = true): String {
-        // Second int is optional since it's useless for alarm type
-
-        fun adjustNum(numValue: Int?, singular: String, plural: String): String {
-            return when (numValue) {
-                0 -> ""
-                1 -> "1 $singular"
-                else -> "$numValue $plural"
-            }
-        }
-
-        var mainScheduleText = ""
-        val displayText: String
-
-        when (menuData.timerType) {
-            true -> {
-                // This will return text for timer type
-                val thisHour: String = adjustNum(menuData.hour, "hour", "hours")
-                val thisMinute = adjustNum(menuData.minute, "minute", "minutes")
-                val thisSecond = adjustNum(menuData.second, "second", "seconds")
-
-                // Checks if all val is not blank
-                displayText =
-                    if (thisHour.isNotBlank() && thisMinute.isNotBlank() && thisSecond.isNotBlank()) {
-                        // Use already existing data with updateRelativeTime()
-                        "${_relativeTimeText.value}"
-                    } else {
-                        val builder = StringBuilder()
-                        if (thisHour.isNotBlank()) builder.append(thisHour).append(" ")
-                        if (thisMinute.isNotBlank()) builder.append(thisMinute).append(" ")
-                        if (thisSecond.isNotBlank()) builder.append(thisSecond).append(" ")
-                        builder.toString()
-                    }
-
-                // Set now or else
-                mainScheduleText =
-                    if (menuData.hour == 0 && menuData.minute == 0 && menuData.second == 0) {
-                        "Now"
-                    } else {
-                        displayText
-                    }
-            }
-            false -> {
-                val hourPad: String = menuData.hour.toString().padStart(2, '0')
-                val minutePad: String = menuData.minute.toString().padStart(2, '0')
-                displayText = "$hourPad:$minutePad"
-
-                // Get current time from phone
-                val c: Calendar = Calendar.getInstance()
-                val currentHour = c.get(Calendar.HOUR_OF_DAY)
-                val currentMinute = c.get(Calendar.MINUTE)
-                val currentMinuteOfDay = (currentHour * 60) + currentMinute
-
-                // Get active/assigned time from dialog
-                val assignedHourOfDay: Int = menuData.hour ?: 0
-                val assignedMinute: Int = menuData.minute ?: 0
-                val assignedMinuteOfDay = (assignedHourOfDay * 60) + assignedMinute
-
-                // Set now or else
-                mainScheduleText =
-                    if (assignedMinuteOfDay <= currentMinuteOfDay) {
-                        "Now"
-                    } else {
-                        displayText
-                    }
-            }
-        }
-        println("mainScheduleText is $mainScheduleText")
-
-        if (withSharedPref) {
-            _mainScheduleText.value = mainScheduleText
-            val sharedPref = SharedPrefFunction(context)
-            with(sharedPref.editor) {
-                putString(SharedPrefFunction.SCHEDULE_TEXT, _mainScheduleText.value)
-                apply()
-            }
-        }
-
+        val (mainScheduleText) =
+            UpdateTextFunction(context).updateMainText(scheduleData, updateSharedPref)
+        _mainScheduleText.value = mainScheduleText
         return mainScheduleText
     }
 }

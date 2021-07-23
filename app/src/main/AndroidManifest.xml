@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
     <application
         android:allowBackup="false"
@@ -16,10 +17,9 @@
         android:theme="@style/Theme.Infake">
 
         <receiver
-            android:name=".service.DeclineBroadcast"
+            android:name=".service.DeclineReceiver"
             android:enabled="true"/>
 
-        <service android:name=".service.FlutterStartUpService" />
         <service android:name=".service.AlarmService" />
         <service android:name=".service.NotificationService" />
 

@@ -9,7 +9,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.sawelo.infake.CreateViewModel
-import com.sawelo.infake.MenuData
+import com.sawelo.infake.ScheduleData
 import com.sawelo.infake.databinding.DialogRelativeScheduleBinding
 
 
@@ -45,13 +45,13 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
 
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
-            .setNeutralButton("Alarm type") { _, _ ->
+            .setNeutralButton("Alarm Type") { _, _ ->
                 ScheduleSpecificFragment().show(
                     parentFragmentManager, "ScheduleSpecificFragment"
                 )
             }
             .setPositiveButton("Ok") { _, _ ->
-                model.mainSetTime(requireContext(), MenuData(
+                model.mainSetTime(requireContext(), ScheduleData(
                     timerType = true,
                     hour = model.relativeHourNum.value,
                     minute = model.relativeMinuteNum.value,
