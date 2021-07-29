@@ -19,9 +19,6 @@ class SharedPrefFunction(context: Context) {
         const val RELATIVE_SECOND = "RELATIVE_SECOND"
 
         const val TIMER_TYPE = "TIMER_TYPE"
-
-        const val SCHEDULE_TEXT = "SCHEDULE_TEXT"
-        const val NOTIFICATION_TEXT = "NOTIFICATION_TEXT"
     }
     private val contactData: ContactData = ContactData()
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
@@ -42,9 +39,6 @@ class SharedPrefFunction(context: Context) {
     val relativeSecond = sharedPref.getInt(RELATIVE_SECOND, 0)
 
     val timerType = sharedPref.getBoolean(TIMER_TYPE, true)
-
-    val scheduleText = sharedPref.getString(SCHEDULE_TEXT, "Schedule Call")
-    val notificationText = sharedPref.getString(NOTIFICATION_TEXT, "Preparing call")
 
     val scheduleData: ScheduleData =
         if (timerType) {

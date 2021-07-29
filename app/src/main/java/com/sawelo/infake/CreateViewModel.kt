@@ -73,7 +73,7 @@ class CreateViewModel : ViewModel() {
                 mainSetTime(context, menuData)
                 dismissMenuDialog(fragment)
             }
-            button.text = updateMainValues(context, menuData, updateSharedPref = false)
+            button.text = updateMainValues(context, menuData, updateScheduleText = false)
         }
     }
 
@@ -150,11 +150,12 @@ class CreateViewModel : ViewModel() {
     private fun updateMainValues(
         context: Context,
         scheduleData: ScheduleData,
-        updateSharedPref: Boolean = true): String {
+        updateScheduleText: Boolean = true
+    ): String {
 
         val (mainScheduleText) =
-            UpdateTextFunction(context).updateMainText(scheduleData, updateSharedPref)
-        _mainScheduleText.value = mainScheduleText
+            UpdateTextFunction(context).updateMainText(scheduleData)
+        if (updateScheduleText) {_mainScheduleText.value = mainScheduleText}
         return mainScheduleText
     }
 }

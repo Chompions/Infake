@@ -41,18 +41,21 @@ class NotificationService : Service() {
 
         // Initialize Intents
         val defaultIntent = Intent(this, CallActivity::class.java)
-                .putExtra("route", "defaultIntent")
+            .putExtra("route", "defaultIntent")
         val answerIntent = Intent(this, CallActivity::class.java)
-                .putExtra("route", "answerIntent")
+            .putExtra("route", "answerIntent")
         val declineIntent = Intent(this, DeclineReceiver::class.java)
 
         // Initialize PendingIntents
         val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(
-                this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val answerPendingIntent: PendingIntent = PendingIntent.getActivity(
-                this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val declinePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-                this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         // Applying PendingIntents on buttons in customNotification
         customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
@@ -61,39 +64,34 @@ class NotificationService : Service() {
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH).apply {
-
-            }
-
-            // Set sound for channel
-            val audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                val audioAttributes = AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .build()
-
-            channel.apply {
-                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE), audioAttributes)
-                enableVibration(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+                    audioAttributes)
             }
-
             // Register the channel with the system
             intentFunction.notificationManager.createNotificationChannel(channel)
         }
 
         // Build Notification
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_CALL)
-                .setFullScreenIntent(defaultPendingIntent, true)
-                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(customNotification)
-                .setCustomBigContentView(customNotification)
-                .setOngoing(true)
-                .setVisibility(VISIBILITY_PUBLIC)
-                .setVibrate(longArrayOf(0, 250, 1000, 250, 1000))
+            .setSmallIcon(R.drawable.ic_notification)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setFullScreenIntent(defaultPendingIntent, true)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(customNotification)
+            .setCustomBigContentView(customNotification)
+            .setOngoing(true)
+            .setVisibility(VISIBILITY_PUBLIC)
+            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
 
         val buildNotification: Notification = builder.build().apply {
             this.flags = Notification.FLAG_INSISTENT
@@ -105,6 +103,7 @@ class NotificationService : Service() {
                 val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished)
                 Log.d("NotificationService", "Countdown: $secondsUntilFinished")
             }
+
             override fun onFinish() {
                 intentFunction.cancelCall(destroyAlarmService = true)
             }

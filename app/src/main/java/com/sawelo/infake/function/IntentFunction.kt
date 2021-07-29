@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.sawelo.infake.service.AlarmService
 import com.sawelo.infake.service.DeclineReceiver
+import com.sawelo.infake.service.FlutterService
 import com.sawelo.infake.service.NotificationService
 
 class IntentFunction (context: Context) {
@@ -19,7 +20,7 @@ class IntentFunction (context: Context) {
     val notificationManager: NotificationManager =
         mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    val flutterReceiverIntent = Intent(FLUTTER_RECEIVER_ACTION)
+    val flutterServiceIntent = Intent(mContext, FlutterService::class.java)
     val notificationServiceIntent = Intent(mContext, NotificationService::class.java)
     private val alarmServiceIntent = Intent(mContext, AlarmService::class.java)
 
@@ -38,6 +39,7 @@ class IntentFunction (context: Context) {
         notificationManager.cancel(NotificationService.NOTIFICATION_ID)
 
         mContext.stopService(notificationServiceIntent)
+        mContext.stopService(flutterServiceIntent)
         if (destroyAlarmService) { mContext.stopService(alarmServiceIntent) }
         if (destroyFlutterEngine) {FlutterFunction().destroyFlutterEngine()}
     }

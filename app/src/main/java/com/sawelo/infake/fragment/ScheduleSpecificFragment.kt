@@ -4,11 +4,15 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.sawelo.infake.CreateViewModel
+import com.sawelo.infake.R
 import com.sawelo.infake.ScheduleData
 import com.sawelo.infake.databinding.DialogSpecificScheduleBinding
 import java.util.*
@@ -34,24 +38,38 @@ class ScheduleSpecificFragment : DialogFragment(), TimePicker.OnTimeChangedListe
 
         binding.specificTime.setIs24HourView(true)
 
+        val span = SpannableString("i").apply {
+            setSpan(ImageSpan(
+                requireContext(),
+                R.drawable.ic_baseline_timer),
+                0, 1 ,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        binding.timerType.text = span
+
+        binding.timerType.setOnClickListener{
+            ScheduleRelativeFragment().show(
+                parentFragmentManager, "ScheduleRelativeFragment")
+            dialog?.dismiss()
+        }
+
+        binding.okBtn.setOnClickListener{
+            model.mainSetTime(requireContext(), ScheduleData(
+                timerType = false,
+                hour = model.specificHourNum.value,
+                minute = model.specificMinuteNum.value
+            ))
+            model.dismissMenuDialog(fragment = this@ScheduleSpecificFragment)
+            dialog?.dismiss()
+        }
+
+        binding.cancelBtn.setOnClickListener{
+            dialog?.dismiss()
+        }
+
         return AlertDialog.Builder(requireContext())
             .setView(binding.root)
-            .setNeutralButton("Timer Type") { _, _ ->
-                ScheduleRelativeFragment().show(
-                    parentFragmentManager, "ScheduleRelativeFragment")
-            }
-            .setPositiveButton("Ok") { _, _ ->
-                model.mainSetTime(requireContext(), ScheduleData(
-                    timerType = false,
-                    hour = model.specificHourNum.value,
-                    minute = model.specificMinuteNum.value
-                ))
-                model.dismissMenuDialog(fragment = this@ScheduleSpecificFragment)
-                dialog?.dismiss()
-            }
-            .setNegativeButton("Cancel") { _, _ ->
-                dialog?.dismiss()
-            }
             .create()
     }
 

@@ -3,12 +3,16 @@ package com.sawelo.infake.fragment
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.sawelo.infake.CreateViewModel
+import com.sawelo.infake.R
 import com.sawelo.infake.ScheduleData
 import com.sawelo.infake.databinding.DialogRelativeScheduleBinding
 
@@ -43,26 +47,41 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
 
         model.relativeTimeText.observe(this, relativeTimeTextObserver)
 
+        val span = SpannableString("i").apply {
+            setSpan(
+                ImageSpan(
+                requireContext(),
+                R.drawable.ic_baseline_access_alarm),
+                0, 1 ,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        binding.alarmType.text = span
+
+        binding.alarmType.setOnClickListener{
+            ScheduleSpecificFragment().show(
+                parentFragmentManager, "ScheduleSpecificFragment"
+            )
+            dialog?.dismiss()
+        }
+
+        binding.okBtn.setOnClickListener{
+            model.mainSetTime(requireContext(), ScheduleData(
+                timerType = true,
+                hour = model.relativeHourNum.value,
+                minute = model.relativeMinuteNum.value,
+                second = model.relativeSecondNum.value
+            ))
+            model.dismissMenuDialog(fragment = this@ScheduleRelativeFragment)
+            dialog?.dismiss()
+        }
+
+        binding.cancelBtn.setOnClickListener{
+            dialog?.dismiss()
+        }
+
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
-            .setNeutralButton("Alarm Type") { _, _ ->
-                ScheduleSpecificFragment().show(
-                    parentFragmentManager, "ScheduleSpecificFragment"
-                )
-            }
-            .setPositiveButton("Ok") { _, _ ->
-                model.mainSetTime(requireContext(), ScheduleData(
-                    timerType = true,
-                    hour = model.relativeHourNum.value,
-                    minute = model.relativeMinuteNum.value,
-                    second = model.relativeSecondNum.value
-                ))
-                model.dismissMenuDialog(fragment = this@ScheduleRelativeFragment)
-                dialog?.dismiss()
-            }
-            .setNegativeButton("Cancel") { _, _ ->
-                dialog?.dismiss()
-            }
             .create()
     }
 

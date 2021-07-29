@@ -3,7 +3,6 @@ package com.sawelo.infake.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -23,10 +22,9 @@ class AlarmService: Service() {
     }
 
     private lateinit var alarmManager: AlarmManager
-    private lateinit var flutterReceiverPendingIntent: PendingIntent
+    private lateinit var flutterServicePendingIntent: PendingIntent
     private lateinit var builder: NotificationCompat.Builder
     private lateinit var intentFunction: IntentFunction
-    private lateinit var flutterReceiver: FlutterReceiver
     private lateinit var sharedPref: SharedPrefFunction
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -35,13 +33,6 @@ class AlarmService: Service() {
 
         sharedPref = SharedPrefFunction(this)
         intentFunction = IntentFunction(this)
-
-        flutterReceiver = FlutterReceiver()
-        val flutterReceiverFilter = IntentFilter().apply {
-            addAction(IntentFunction.FLUTTER_RECEIVER_ACTION)
-            addCategory(Intent.CATEGORY_DEFAULT)
-        }
-        registerReceiver(flutterReceiver, flutterReceiverFilter)
 
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -59,7 +50,7 @@ class AlarmService: Service() {
         setAlarm()
         val (_, notificationText) =
             UpdateTextFunction(this)
-                .updateMainText(sharedPref.scheduleData, false)
+                .updateMainText(sharedPref.scheduleData)
 
         // Build Notification
         builder = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -73,7 +64,7 @@ class AlarmService: Service() {
                 intentFunction.callDeclineService(System.currentTimeMillis().toInt())
             )
 
-        // Cancel everything except receiver before starting alarm
+        // Cancel everything before starting alarm
         intentFunction.cancelCall()
         startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
@@ -81,15 +72,15 @@ class AlarmService: Service() {
 
     // Setting RCT_Wakeup directly to FlutterReceiver
     private fun setAlarm() {
-        Log.d("AlarmService", "Run setAlarm() for ${sharedPref.scheduleText}")
-
-        // Create Intent & PendingIntent to start FlutterReceiver
-        flutterReceiverPendingIntent = PendingIntent.getBroadcast(
-            this, 0, intentFunction.flutterReceiverIntent, PendingIntent.FLAG_CANCEL_CURRENT
-        )
+        Log.d("AlarmService", "Run setAlarm()")
 
         // Create AlarmManager
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Create Intent & PendingIntent to start FlutterReceiver
+        flutterServicePendingIntent = PendingIntent.getService(
+            this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT
+        )
 
         val c: Calendar = Calendar.getInstance()
         if (sharedPref.timerType) {
@@ -125,32 +116,26 @@ class AlarmService: Service() {
             alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(
                     c.timeInMillis,
-                    flutterReceiverPendingIntent
+                    flutterServicePendingIntent
                 ),
-                flutterReceiverPendingIntent
+                flutterServicePendingIntent
             )
         } else {
             alarmManager.setExact(
                 AlarmManager.RTC_WAKEUP,
                 c.timeInMillis,
-                flutterReceiverPendingIntent
+                flutterServicePendingIntent
             )
         }
     }
 
     override fun onDestroy() {
-        unregisterReceiver(flutterReceiver)
-        if (FlutterReceiver.timerStarted) {
-            FlutterReceiver.stopTimer.cancel()
-            FlutterReceiver.timerStarted = false
-        }
-        alarmManager.cancel(flutterReceiverPendingIntent)
-
+        alarmManager.cancel(flutterServicePendingIntent)
         Log.d("Destroy", "AlarmService is destroyed")
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        TODO("Return the communication channel to the service.")
+    override fun onBind(intent: Intent): IBinder? {
+        return null
     }
 }

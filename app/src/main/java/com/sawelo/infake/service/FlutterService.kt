@@ -1,9 +1,9 @@
 package com.sawelo.infake.service
 
-import android.content.BroadcastReceiver
-import android.content.Context
+import android.app.Service
 import android.content.Intent
 import android.os.CountDownTimer
+import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.sawelo.infake.R
@@ -11,26 +11,21 @@ import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.IntentFunction
 import java.util.concurrent.TimeUnit
 
-class FlutterReceiver : BroadcastReceiver() {
+class FlutterService : Service() {
+    lateinit var stopTimer: CountDownTimer
 
-    companion object {
-        lateinit var stopTimer: CountDownTimer
-        var timerStarted: Boolean = false
-    }
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d("FlutterReceiver", "Starting FlutterReceiver")
-        if (context != null) {
-            Log.d("FlutterReceiver", "Context is not null")
-            val intentFunction = IntentFunction(context)
-            FlutterFunction().createFlutterEngine(context)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("FlutterService", "Starting FlutterService")
+            val intentFunction = IntentFunction(this)
+            FlutterFunction().createFlutterEngine(this)
 
             // Build Notification
-            val builder = NotificationCompat.Builder(context, AlarmService.CHANNEL_ID)
+            val builder = NotificationCompat.Builder(this, AlarmService.CHANNEL_ID)
                 .setContentTitle("Infake")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
-                .addAction(R.drawable.ic_baseline_cancel, "Cancel",
+                .addAction(
+                    R.drawable.ic_baseline_cancel, "Cancel",
                     intentFunction.callDeclineService(System.currentTimeMillis().toInt()))
 
             // Countdown until FlutterReceiver stops
@@ -52,17 +47,21 @@ class FlutterReceiver : BroadcastReceiver() {
                     intentFunction.cancelCall(
                         destroyFlutterEngine = false,
                         destroyAlarmService = true)
-                    context.startService(intentFunction.notificationServiceIntent)
+                    startService(intentFunction.notificationServiceIntent)
                 }
             }
-            timerStarted = true
-
             stopTimer.cancel()
             stopTimer.start()
-        } else {
-            Log.d("FlutterReceiver", "Context is null")
-        }
+        return START_STICKY
     }
 
+    override fun onDestroy() {
+        stopTimer.cancel()
+        Log.d("Destroy", "FlutterService is destroyed")
+        super.onDestroy()
+    }
 
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
 }

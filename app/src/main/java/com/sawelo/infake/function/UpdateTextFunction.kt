@@ -10,8 +10,8 @@ class UpdateTextFunction(context: Context) {
     private val mContext = context
 
     fun updateMainText(
-        scheduleData: ScheduleData,
-        updateSharedPref: Boolean = true):
+        scheduleData: ScheduleData
+    ):
             Pair<String, String> {
 
         /**
@@ -73,13 +73,16 @@ class UpdateTextFunction(context: Context) {
                         builder.toString()
                     }
 
+                val hourPad: String = setHour.toString().padStart(2, '0')
+                val minutePad: String = setMinute.toString().padStart(2, '0')
+
                 // Set now or else
                 if (scheduleData.hour == 0 && scheduleData.minute == 0 && scheduleData.second == 0) {
                     mainScheduleText = "Now"
                     notificationText = "The call is starting now"
                 } else {
                     mainScheduleText = displayText
-                    notificationText = "Preparing call for$displayText ($setHour:$setMinute)"
+                    notificationText = "Preparing call for$displayText ($hourPad:$minutePad)"
                 }
 
             }
@@ -112,14 +115,6 @@ class UpdateTextFunction(context: Context) {
         }
         Log.d("UpdateTextFunction", "mainScheduleText is $mainScheduleText")
         Log.d("UpdateTextFunction", "notificationText is $notificationText")
-
-        if (updateSharedPref) {
-            with(sharedPref.editor) {
-                putString(SharedPrefFunction.SCHEDULE_TEXT, mainScheduleText)
-                putString(SharedPrefFunction.NOTIFICATION_TEXT, notificationText)
-                apply()
-            }
-        }
 
         return Pair(mainScheduleText, notificationText)
     }

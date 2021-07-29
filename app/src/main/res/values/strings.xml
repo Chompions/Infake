@@ -14,4 +14,7 @@
     <string name="_5_minutes">5 minutes</string>
     <string name="_10_minutes">10 minutes</string>
     <string name="custom_time">Custom time</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="contact_picture">Contact Picture</string>
 </resources>

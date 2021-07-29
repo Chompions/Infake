@@ -48,16 +48,25 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView2"
                 app:layout_constraintVertical_bias="0.05" />
 
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/contact_picture"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/contact_picture_card_view"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="13dp"
-                android:src="@drawable/ic_contact_picture"
+                app:cardCornerRadius="50dp"
+                android:onClick="@{() -> createFragment.openImage()}"
                 style="?attr/borderlessButtonStyle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button" />
+                app:layout_constraintTop_toBottomOf="@+id/button">
+                <ImageView
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:id="@+id/contact_picture"
+                    android:src="@drawable/ic_contact_picture"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/contact_picture"/>
+            </androidx.cardview.widget.CardView>
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/contact_name"
@@ -69,7 +78,7 @@
                 style="@style/ContactButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/contact_picture" />
+                app:layout_constraintTop_toBottomOf="@+id/contact_picture_card_view" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/contact_number"
@@ -96,17 +105,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/contact_number" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/ringtone_button"
-                android:layout_marginTop="13dp"
-                android:hint="@string/ringtone"
-                android:drawableStart="@drawable/ic_baseline_music_note"
-                android:drawableEnd="@drawable/ic_baseline_cancel_transparent"
-                style="@style/ContactButton"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/schedule_call_button" />
-
             <HorizontalScrollView
                 android:id="@+id/call_screen_button"
                 android:layout_marginTop="13dp"
@@ -114,7 +112,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ringtone_button">
+                app:layout_constraintTop_toBottomOf="@id/schedule_call_button">
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="wrap_content"
