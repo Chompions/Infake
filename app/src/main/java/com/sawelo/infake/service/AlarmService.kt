@@ -78,9 +78,16 @@ class AlarmService: Service() {
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // Create Intent & PendingIntent to start FlutterReceiver
+//        flutterServicePendingIntent = if (Build.VERSION.SDK_INT >= 26) {
+//            PendingIntent.getForegroundService(
+//                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+//        } else {
+//            PendingIntent.getService(
+//                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+//        }
+
         flutterServicePendingIntent = PendingIntent.getService(
-            this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT
-        )
+            this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val c: Calendar = Calendar.getInstance()
         if (sharedPref.timerType) {

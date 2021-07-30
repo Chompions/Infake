@@ -12,51 +12,59 @@ import com.sawelo.infake.function.IntentFunction
 import java.util.concurrent.TimeUnit
 
 class FlutterService : Service() {
-    lateinit var stopTimer: CountDownTimer
+
+    companion object {
+        var stopTimer: CountDownTimer? = null
+    }
+
+    private lateinit var intentFunction: IntentFunction
+    private lateinit var builder: NotificationCompat.Builder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("FlutterService", "Starting FlutterService")
-            val intentFunction = IntentFunction(this)
-            FlutterFunction().createFlutterEngine(this)
+        FlutterFunction().createFlutterEngine(this)
 
-            // Build Notification
-            val builder = NotificationCompat.Builder(this, AlarmService.CHANNEL_ID)
-                .setContentTitle("Infake")
-                .setSmallIcon(R.drawable.ic_notification)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
-                .addAction(
-                    R.drawable.ic_baseline_cancel, "Cancel",
-                    intentFunction.callDeclineService(System.currentTimeMillis().toInt()))
+        intentFunction = IntentFunction(this)
 
-            // Countdown until FlutterReceiver stops
-            stopTimer = object: CountDownTimer(10000, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    val secondsUntilFinished = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished).toInt()
+        // Build Notification
+        builder = NotificationCompat.Builder(this, AlarmService.CHANNEL_ID)
+            .setContentTitle("Infake")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .addAction(
+                R.drawable.ic_baseline_cancel, "Cancel",
+                intentFunction.callDeclineService(System.currentTimeMillis().toInt())
+            )
 
-                    if (secondsUntilFinished > 1) {
-                        builder.setContentText("Incoming call in $secondsUntilFinished seconds")
-                    } else {
-                        builder.setContentText("Incoming call in 1 second")
-                    }
+        Log.d("FlutterService", "Starting stopTimer")
+        // Countdown until FlutterReceiver stops
+        stopTimer = object : CountDownTimer(10000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsUntilFinished =
+                    TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished).toInt()
 
-                    intentFunction.notificationManager.notify(
-                        AlarmService.NOTIFICATION_ID, builder.build())
-                    Log.d("FlutterReceiver", "Countdown: $secondsUntilFinished")
+                if (secondsUntilFinished > 1) {
+                    builder.setContentText("Incoming call in $secondsUntilFinished seconds")
+                } else {
+                    builder.setContentText("Incoming call in 1 second")
                 }
-                override fun onFinish() {
-                    intentFunction.cancelCall(
-                        destroyFlutterEngine = false,
-                        destroyAlarmService = true)
-                    startService(intentFunction.notificationServiceIntent)
-                }
+
+                intentFunction.notificationManager.notify(AlarmService.NOTIFICATION_ID, builder.build())
+                Log.d("FlutterReceiver", "Countdown: $secondsUntilFinished")
             }
-            stopTimer.cancel()
-            stopTimer.start()
+
+            override fun onFinish() {
+                intentFunction.cancelCall(
+                    destroyFlutterEngine = false,
+                    destroyAlarmService = true
+                )
+                startService(intentFunction.notificationServiceIntent)
+            }
+        }.start()
         return START_STICKY
     }
 
     override fun onDestroy() {
-        stopTimer.cancel()
         Log.d("Destroy", "FlutterService is destroyed")
         super.onDestroy()
     }

@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.sawelo.infake.service.AlarmService
 import com.sawelo.infake.service.DeclineReceiver
 import com.sawelo.infake.service.FlutterService
@@ -22,7 +23,7 @@ class IntentFunction (context: Context) {
 
     val flutterServiceIntent = Intent(mContext, FlutterService::class.java)
     val notificationServiceIntent = Intent(mContext, NotificationService::class.java)
-    private val alarmServiceIntent = Intent(mContext, AlarmService::class.java)
+    val alarmServiceIntent = Intent(mContext, AlarmService::class.java)
 
     fun callDeclineService(requestCode: Int): PendingIntent {
         val declineIntent = Intent(mContext, DeclineReceiver::class.java)
@@ -34,6 +35,8 @@ class IntentFunction (context: Context) {
     fun cancelCall(
         destroyFlutterEngine: Boolean = true,
         destroyAlarmService: Boolean = false) {
+
+        Log.d("IntentFunction", "Starting cancelCall")
 
         notificationManager.cancel(AlarmService.NOTIFICATION_ID)
         notificationManager.cancel(NotificationService.NOTIFICATION_ID)

@@ -10,6 +10,10 @@ class DeclineReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("DeclineReceiver", "Starting DeclineReceiver")
+        if (FlutterService.stopTimer != null) {
+            FlutterService.stopTimer!!.cancel()
+            FlutterService.stopTimer = null
+        }
         IntentFunction(context).cancelCall(
             destroyAlarmService = true)
     }

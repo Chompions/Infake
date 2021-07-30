@@ -63,7 +63,7 @@
                     android:layout_height="match_parent"
                     android:layout_width="match_parent"
                     android:id="@+id/contact_picture"
-                    android:src="@drawable/ic_contact_picture"
+                    android:src="@drawable/default_profile_picture"
                     android:scaleType="centerCrop"
                     android:contentDescription="@string/contact_picture"/>
             </androidx.cardview.widget.CardView>

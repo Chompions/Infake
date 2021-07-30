@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,23 +16,24 @@ class FakeCall extends StatefulWidget {
 
 class _FakeCallState extends State<FakeCall> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  String name = "FlutterDefaultName";
-  String number = "FlutterDefaultNumber";
+  String name = "FlutterName";
+  String number = "FlutterNumber";
   String route = "/InitialRoute";
+  String imageEncoded = "FlutterImage";
+  Uint8List bytes;
 
   // Get contact data from Android
   Future _getContactDataFromAndroid() async {
     try {
       FakeCall.platform.setMethodCallHandler((call) async {
         if (call.method == "call_method") {
-          final jsonResult = await jsonDecode(call.arguments);
+          name = call.arguments['name'];
+          number = call.arguments['number'];
+          route = call.arguments['route'];
+          imageEncoded = call.arguments['imageBase64'];
 
-          setState(() {
-            name = jsonResult['name'] as String;
-            number = jsonResult['number'] as String;
-            route = jsonResult['route'] as String;
-          });
-
+          print(route);
+          print(imageEncoded);
           navigatorKey.currentState.popAndPushNamed(route);
         }
       });
@@ -59,7 +59,8 @@ class _FakeCallState extends State<FakeCall> {
       initialRoute: "/InitialRoute",
       routes: {
         "/InitialRoute": (context) => InitialRoute(),
-        "/WhatsAppIncomingCall": (context) => WhatsAppIncomingCall(name, number, route),
+        "/WhatsAppIncomingCall": (context) => WhatsAppIncomingCall(
+            name, number, imageEncoded),
         "/WhatsAppOngoingCall": (context) => WhatsAppOngoingCall(),
       },
     );

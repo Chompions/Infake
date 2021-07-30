@@ -46,7 +46,6 @@ class CallActivity: FragmentActivity(), SensorEventListener {
 
         // Stop NotificationService
         this.stopService(Intent(this, NotificationService::class.java))
-        Log.d("CallActivity", "Service stopped")
 
         // Setting up display switch (on/off) during call
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -58,7 +57,6 @@ class CallActivity: FragmentActivity(), SensorEventListener {
 
         // Instantiate sharedPref
         val sharedPref = SharedPrefFunction(this)
-        Log.d("CallActivity", "Data: ${sharedPref.activeName}, ${sharedPref.activeNumber}")
 
         fun initializeMethodCall(routeExtra: String) {
             FlutterFunction().sendMethodCall(
@@ -66,8 +64,12 @@ class CallActivity: FragmentActivity(), SensorEventListener {
                     sharedPref.activeName,
                     sharedPref.activeNumber,
                     routeExtra,
+                    sharedPref.imageBase64
                 ))
+            Log.d("CallActivity", "name: ${sharedPref.activeName}")
+            Log.d("CallActivity", "number: ${sharedPref.activeNumber}")
             Log.d("CallActivity", "routeExtra: $routeExtra")
+            Log.d("CallActivity", "imageBase64: ${sharedPref.imageBase64}")
         }
 
         val route = intent.extras?.getString("route")
@@ -216,6 +218,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         if (!useProximityWakeLock) { sensorManager.unregisterListener(this) }
         if (partialWakeLock.isHeld) {partialWakeLock.release()}
         IntentFunction(this).cancelCall(destroyAlarmService = true)
+        Log.d("Destroy", "CallActivity is destroyed")
         super.onDestroy()
     }
 }

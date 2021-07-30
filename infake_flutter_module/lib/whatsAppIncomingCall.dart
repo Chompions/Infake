@@ -1,15 +1,24 @@
+import 'dart:convert';
+
 import 'package:infake_flutter_module/utilities/waBottomButton.dart';
 import 'package:flutter/material.dart';
 
 class WhatsAppIncomingCall extends StatelessWidget {
   final String name;
   final String number;
-  final String route;
+  final String imageEncoded;
 
-  WhatsAppIncomingCall(this.name, this.number, this.route);
+  WhatsAppIncomingCall(this.name, this.number, this.imageEncoded);
 
   @override
   Widget build(BuildContext context) {
+    print("Name: $name");
+    print("Number: $number");
+    print("Image: $imageEncoded");
+
+    String cleanImageEncoded = base64.normalize(
+        imageEncoded.replaceAll(RegExp(r"\s+"), ""));
+
     return Material(
       child: Column(
         children: <Widget>[
@@ -56,9 +65,8 @@ class WhatsAppIncomingCall extends StatelessWidget {
                           ],
                         ),
                         child: CircleAvatar(
-                          // backgroundImage: args.image != null
-                          //     ? Image.file(args.image).image
-                          //     : AssetImage('assets/default-profile.jpg'),
+                          backgroundImage: MemoryImage(
+                              base64.decode(cleanImageEncoded)),
                           radius: 47.0,
                         ),
                       ),

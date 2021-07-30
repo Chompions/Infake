@@ -2,7 +2,6 @@ package com.sawelo.infake.function
 
 import android.content.Context
 import android.util.Log
-import com.google.gson.Gson
 import com.sawelo.infake.ContactData
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -24,15 +23,6 @@ class FlutterFunction{
             DartExecutor.DartEntrypoint.createDefault()
         )
 
-        val sharedPref = SharedPrefFunction(context)
-        sendMethodCall(
-            ContactData(
-                sharedPref.activeName,
-                sharedPref.activeNumber,
-                sharedPref.activeRoute,
-            )
-        )
-
         // Cache the FlutterEngine
         FlutterEngineCache
             .getInstance()
@@ -46,17 +36,23 @@ class FlutterFunction{
     }
 
     fun sendMethodCall(contactData: ContactData) {
-        // This should only be used within CallActivity and FlutterFunction
-        // to avoid redundant calls
+        /**
+         * This should only be used within CallActivity to avoid redundant calls
+         */
+
+        val arguments = mutableMapOf<String, String>()
+        arguments["name"] = contactData.name
+        arguments["number"] = contactData.number
+        arguments["route"] = contactData.route
+        arguments["imageBase64"] = contactData.imageBase64
+
+        Log.d("FlutterFunction", "$arguments")
 
         if (flutterEngine != null) {
             MethodChannel(
-                flutterEngine?.dartExecutor?.binaryMessenger, "method_channel_name"
-            )
-                .invokeMethod(
-                    "call_method",
-                    Gson().toJson(contactData)
-                )
+                flutterEngine!!.dartExecutor.binaryMessenger, "method_channel_name")
+                .invokeMethod("call_method", arguments)
+            Log.d("FlutterFunction", "sendMethodCall succeed")
         } else {
             Log.d("FlutterFunction", "sendMethodCall failed")
         }
