@@ -3,13 +3,16 @@ package com.sawelo.infake.fragment
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatEditText
@@ -27,6 +30,9 @@ import java.util.*
 
 class CreateFragment : Fragment(R.layout.fragment_create) {
     private lateinit var photoResultLauncher: ActivityResultLauncher<Intent>
+
+    private lateinit var requestContactPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var contactResultLauncher: ActivityResultLauncher<Void>
     private lateinit var sharedPref: SharedPrefFunction
     private lateinit var intentFunction: IntentFunction
 
@@ -40,16 +46,15 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
     private val model: CreateViewModel by activityViewModels()
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         sharedPref = SharedPrefFunction(requireContext())
         intentFunction = IntentFunction(requireContext())
 
         photoResultLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()) { result ->
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
             val data: Intent? = result.data
             if (result.resultCode == Activity.RESULT_OK && data != null) {
                 val imageUri: Uri = data.data!!
@@ -66,6 +71,78 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             }
         }
 
+        requestContactPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                contactResultLauncher.launch(null)
+            } else {
+                Toast.makeText(requireContext(), "Your permission is required", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
+        contactResultLauncher = registerForActivityResult(
+            ActivityResultContracts.PickContact()
+        ) { contentUri ->
+            println(contentUri)
+
+            val contentResolver = requireContext().contentResolver
+
+            val projection: Array<out String> = arrayOf(
+                ContactsContract.Contacts._ID,
+                ContactsContract.Contacts.LOOKUP_KEY,
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Contacts.HAS_PHONE_NUMBER,
+            )
+
+            val cursor: Cursor? = contentResolver.query(
+                contentUri, projection, null, null, null
+            )
+
+            cursor?.moveToFirst()
+            if (cursor?.moveToFirst() == true) {
+                val contactId = cursor.getString(0)
+                val contactLookup = cursor.getString(1)
+                val contactName = cursor.getString(2)
+                val hasPhoneNumber: Boolean = cursor.getInt(3) == 1
+                var contactNumber = ""
+
+                if (hasPhoneNumber) {
+                    val numberCursor = contentResolver.query(
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        null,
+                        "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = $contactId",
+                        null, null
+                    )
+
+                    if (numberCursor?.moveToNext() == true) {
+                        contactNumber = numberCursor.getString(numberCursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.Phone.DATA1))
+                    }
+                    numberCursor?.close()
+                }
+
+                println("Contact ID: $contactId")
+                println("Contact Lookup: $contactLookup")
+                println("Contact Name: $contactName ")
+                println("Contact HasPhoneNumber: $hasPhoneNumber")
+                println("Contact Number: $contactNumber")
+
+                binding.contactName.setText(contactName)
+                binding.contactNumber.setText(contactNumber)
+
+            }
+            cursor?.close()
+        }
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentCreateBinding.inflate(layoutInflater)
         return binding.root
     }
@@ -89,7 +166,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
     @SuppressLint("ClickableViewAccessibility")
     fun clearEditText(appCompatEditText: AppCompatEditText) {
-        appCompatEditText.setOnTouchListener {_, event ->
+        appCompatEditText.setOnTouchListener { _, event ->
             val drawableRight = 2
             val checkAction: Boolean = event.action == MotionEvent.ACTION_UP
             val checkPressArea: Boolean = (
@@ -97,7 +174,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                             && event.rawX <= (appCompatEditText.right - appCompatEditText.paddingEnd))
 
             if (checkAction) {
-                if(checkPressArea) {
+                if (checkPressArea) {
                     appCompatEditText.text?.clear()
                     return@setOnTouchListener true
                 }
@@ -115,6 +192,12 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         photoResultLauncher.launch(intent)
     }
 
+    fun openContact() {
+//        val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+//        contactResultLauncher.launch(intent)
+        requestContactPermissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
+    }
+
     fun scheduleCall() {
         ScheduleMenuFragment().show(parentFragmentManager, "ScheduleMenuFragment")
     }
@@ -128,15 +211,24 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             return if (input.isBlank()) default else input
         }
 
-        with (sharedPref.editor) {
-            putString(SharedPrefFunction.ACTIVE_NAME, checkBlank(binding.contactName.text.toString(), sharedPref.activeName))
-            putString(SharedPrefFunction.ACTIVE_NUMBER, checkBlank(binding.contactNumber.text.toString(), sharedPref.activeNumber))
+        with(sharedPref.editor) {
+            putString(
+                SharedPrefFunction.ACTIVE_NAME,
+                checkBlank(binding.contactName.text.toString(), sharedPref.activeName)
+            )
+            putString(
+                SharedPrefFunction.ACTIVE_NUMBER,
+                checkBlank(binding.contactNumber.text.toString(), sharedPref.activeNumber)
+            )
 //            putString(SharedPrefFunction.ACTIVE_ROUTE, checkBlank("/WhatsAppIncomingCall", sharedPref.activeRoute))
             apply()
         }
         // TODO: Change route input according to UI choices
 
-        Log.d("CreateFragment", "Active data: ${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}")
+        Log.d(
+            "CreateFragment",
+            "Active data: ${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}"
+        )
 
         // Start AlarmService
         startForegroundService(requireContext(), intentFunction.alarmServiceIntent)
