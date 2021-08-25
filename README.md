@@ -15,10 +15,6 @@ Current development
 
 At the core of it, this app uses Kotlin as the base system which consequently integrated with Flutter.
 
-There are basic functionality already running, such as:
-- Naming contact
-- Schedule incoming call
-
 <p>
   <img src="https://i.imgur.com/9Eyqsh9.png" width="250" title="menu">
   <img src="https://i.imgur.com/YNYUakj.png" width="250" title="notification">
