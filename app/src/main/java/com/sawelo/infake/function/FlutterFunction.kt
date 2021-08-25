@@ -8,15 +8,19 @@ import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
-class FlutterFunction{
+class FlutterFunction (context: Context) {
     companion object {
         private var flutterEngine:FlutterEngine? = null
+        const val PLATFORM_CHANNEL = "platform_channel"
 //        fun isFlutterEngineInitialized() = Companion::flutterEngine.isInitialized
     }
 
-    fun createFlutterEngine(context: Context) {
+    private val mContext = context
+    private val intentFunction = IntentFunction(mContext)
+
+    fun createFlutterEngine() {
         // Instantiate a FlutterEngine
-        flutterEngine = FlutterEngine(context)
+        flutterEngine = FlutterEngine(mContext)
 
         // Start executing Dart code to pre-warm the FlutterEngine
         flutterEngine?.dartExecutor?.executeDartEntrypoint(
@@ -33,9 +37,10 @@ class FlutterFunction{
         } else
             Log.d("FlutterFunction", "Flutter Engine is not initialized")
 
+        getCancelMethodFromFlutter()
     }
 
-    fun sendMethodCall(contactData: ContactData) {
+    fun sendContactToFlutter(contactData: ContactData) {
         /**
          * This should only be used within CallActivity to avoid redundant calls
          */
@@ -49,12 +54,26 @@ class FlutterFunction{
         Log.d("FlutterFunction", "$arguments")
 
         if (flutterEngine != null) {
-            MethodChannel(
-                flutterEngine!!.dartExecutor.binaryMessenger, "method_channel_name")
-                .invokeMethod("call_method", arguments)
-            Log.d("FlutterFunction", "sendMethodCall succeed")
+            MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, PLATFORM_CHANNEL)
+                .invokeMethod("get_contact", arguments)
+            Log.d("FlutterFunction", "sendContactToFlutter succeed")
         } else {
-            Log.d("FlutterFunction", "sendMethodCall failed")
+            Log.d("FlutterFunction", "sendContactToFlutter failed")
+        }
+    }
+
+    private fun getCancelMethodFromFlutter() {
+        if (flutterEngine != null) {
+            MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, PLATFORM_CHANNEL)
+                .setMethodCallHandler {
+                    call, result ->
+                    if (call.method == "start_cancel_method") {
+                        intentFunction.cancelMethod(destroyFlutterEngine = false)
+                    }
+                }
+            Log.d("FlutterFunction", "getCancelMethodFromFlutter succeed")
+        } else {
+            Log.d("FlutterFunction", "getCancelMethodFromFlutter failed")
         }
     }
 

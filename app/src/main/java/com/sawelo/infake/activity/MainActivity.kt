@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        IntentFunction(this).cancelCall(destroyAlarmService = true)
+        IntentFunction(this).cancelMethod(destroyAlarmService = true)
         super.onDestroy()
     }
 }

@@ -135,7 +135,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
         ),
         RawMaterialButton(
           onPressed: () {
-            Navigator.pop(context);
+            SystemNavigator.pop();
           },
           elevation: 0,
           fillColor: Color(0xFF1A2227),

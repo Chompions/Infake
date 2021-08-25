@@ -22,7 +22,7 @@ class FlutterService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("FlutterService", "Starting FlutterService")
-        FlutterFunction().createFlutterEngine(this)
+        FlutterFunction(this).createFlutterEngine()
 
         intentFunction = IntentFunction(this)
 
@@ -54,7 +54,7 @@ class FlutterService : Service() {
             }
 
             override fun onFinish() {
-                intentFunction.cancelCall(
+                intentFunction.cancelMethod(
                     destroyFlutterEngine = false,
                     destroyAlarmService = true
                 )

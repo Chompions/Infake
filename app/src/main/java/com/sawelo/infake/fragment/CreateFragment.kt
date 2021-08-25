@@ -52,22 +52,21 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         sharedPref = SharedPrefFunction(requireContext())
         intentFunction = IntentFunction(requireContext())
 
+        // Clean up sharedPref before starting anything
+        with(sharedPref.editor) {
+            clear()
+            apply()
+        }
+
         photoResultLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
             val data: Intent? = result.data
             if (result.resultCode == Activity.RESULT_OK && data != null) {
                 val imageUri: Uri = data.data!!
-                val bitmapFunction = BitmapFunction(requireContext())
-                val bitmap = bitmapFunction.generateBitmap(imageUri)
-                val encodedString = bitmapFunction.convertBitmap(bitmap)
-
-                with(sharedPref.editor) {
-                    putString(SharedPrefFunction.IMAGE_BASE_64, encodedString)
-                    apply()
-                }
-
-                binding.contactPicture.setImageBitmap(bitmap)
+                BitmapFunction(requireContext()).updateActivePhoto(
+                    imageUri, sharedPref, binding.contactPicture
+                )
             }
         }
 
@@ -94,6 +93,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 ContactsContract.Contacts.LOOKUP_KEY,
                 ContactsContract.Contacts.DISPLAY_NAME,
                 ContactsContract.Contacts.HAS_PHONE_NUMBER,
+                ContactsContract.Contacts.PHOTO_URI
             )
 
             val cursor: Cursor? = contentResolver.query(
@@ -105,8 +105,12 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 val contactId = cursor.getString(0)
                 val contactLookup = cursor.getString(1)
                 val contactName = cursor.getString(2)
+
                 val hasPhoneNumber: Boolean = cursor.getInt(3) == 1
+                val hasPhoto: Boolean = cursor.getString(4) != null
+
                 var contactNumber = ""
+                var imageUri: Uri? = null
 
                 if (hasPhoneNumber) {
                     val numberCursor = contentResolver.query(
@@ -123,10 +127,19 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                     numberCursor?.close()
                 }
 
+                if (hasPhoto) {
+                    imageUri = Uri.parse(cursor.getString(4))
+                    BitmapFunction(requireContext()).updateActivePhoto(
+                        imageUri, sharedPref, binding.contactPicture
+                    )
+                }
+
                 println("Contact ID: $contactId")
                 println("Contact Lookup: $contactLookup")
                 println("Contact Name: $contactName ")
                 println("Contact HasPhoneNumber: $hasPhoneNumber")
+                println("Contact hasPhoto: $hasPhoto")
+                println("Contact photoUri: $imageUri")
                 println("Contact Number: $contactNumber")
 
                 binding.contactName.setText(contactName)
@@ -229,6 +242,8 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             "CreateFragment",
             "Active data: ${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}"
         )
+
+        Toast.makeText(requireContext(), "Profile created", Toast.LENGTH_SHORT).show()
 
         // Start AlarmService
         startForegroundService(requireContext(), intentFunction.alarmServiceIntent)

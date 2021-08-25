@@ -8,7 +8,7 @@ import 'package:infake_flutter_module/whatsAppOngoingCall.dart';
 void main() => runApp(FakeCall());
 
 class FakeCall extends StatefulWidget {
-  static const platform = MethodChannel("method_channel_name");
+  static const PLATFORM_CHANNEL = MethodChannel("platform_channel");
 
   @override
   _FakeCallState createState() => _FakeCallState();
@@ -25,8 +25,8 @@ class _FakeCallState extends State<FakeCall> {
   // Get contact data from Android
   Future _getContactDataFromAndroid() async {
     try {
-      FakeCall.platform.setMethodCallHandler((call) async {
-        if (call.method == "call_method") {
+      FakeCall.PLATFORM_CHANNEL.setMethodCallHandler((call) async {
+        if (call.method == "get_contact") {
           name = call.arguments['name'];
           number = call.arguments['number'];
           route = call.arguments['route'];
@@ -75,5 +75,14 @@ class InitialRoute extends StatelessWidget {
         color: Colors.black38,
       ),
     );
+  }
+}
+
+// Start cancel method from Android -> for stopping notification
+Future<void> startCancelMethodToAndroid() async {
+  try {
+    FakeCall.PLATFORM_CHANNEL.invokeMethod("start_cancel_method");
+  } on PlatformException catch (e) {
+    print(e.message);
   }
 }

@@ -8,10 +8,28 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
+import android.widget.ImageView
 import java.io.ByteArrayOutputStream
 
 class BitmapFunction(context: Context) {
     private val mContext: Context = context
+
+    fun updateActivePhoto(
+        imageUri: Uri,
+        sharedPref: SharedPrefFunction,
+        imageView: ImageView) {
+
+        val bitmapFunction = BitmapFunction(mContext)
+        val bitmap = bitmapFunction.generateBitmap(imageUri)
+        val encodedString = bitmapFunction.convertBitmap(bitmap)
+
+        with(sharedPref.editor) {
+            putString(SharedPrefFunction.IMAGE_BASE_64, encodedString)
+            apply()
+        }
+
+        imageView.setImageBitmap(bitmap)
+    }
 
     @Suppress("Deprecation")
     fun generateBitmap(imageUri: Uri): Bitmap {

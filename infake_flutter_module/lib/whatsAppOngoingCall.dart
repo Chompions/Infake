@@ -1,11 +1,12 @@
+import 'main.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-
 import 'package:flutter/services.dart';
+import 'dart:async';
 
 class WhatsAppOngoingCall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    startCancelMethodToAndroid();
 
     return Material(
       textStyle: TextStyle(

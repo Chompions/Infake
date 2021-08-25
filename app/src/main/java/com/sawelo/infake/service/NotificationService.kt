@@ -1,5 +1,6 @@
 package com.sawelo.infake.service
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Intent
 import android.media.AudioAttributes
@@ -24,6 +25,7 @@ class NotificationService : Service() {
         const val CHANNEL_ID = "call_id"
         const val CHANNEL_NAME = "Call Channel"
         const val NOTIFICATION_ID = 2
+        const val INTENT_ACTION = "answerCall"
     }
 
     private lateinit var stopTimer: CountDownTimer
@@ -42,20 +44,49 @@ class NotificationService : Service() {
         // Initialize Intents
         val defaultIntent = Intent(this, CallActivity::class.java)
             .putExtra("route", "defaultIntent")
+
         val answerIntent = Intent(this, CallActivity::class.java)
             .putExtra("route", "answerIntent")
+            .setAction(INTENT_ACTION)
+
         val declineIntent = Intent(this, DeclineReceiver::class.java)
 
-        // Initialize PendingIntents
-        val defaultPendingIntent: PendingIntent = PendingIntent.getActivity(
-            this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val answerPendingIntent: PendingIntent = PendingIntent.getActivity(
-            this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val declinePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val defaultPendingIntent: PendingIntent?
+        val answerPendingIntent: PendingIntent?
+        val declinePendingIntent: PendingIntent?
+
+        // Initialize PendingIntents for API level 23 or else
+        @SuppressLint("UnspecifiedImmutableFlag")
+        if (Build.VERSION.SDK_INT >= 23) {
+            defaultPendingIntent = PendingIntent.getActivity(
+                this,
+                1,
+                defaultIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            answerPendingIntent = PendingIntent.getActivity(
+                this,
+                2,
+                answerIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            declinePendingIntent = PendingIntent.getBroadcast(
+                this,
+                3,
+                declineIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        } else {
+            defaultPendingIntent = PendingIntent.getActivity(
+                this, 1, defaultIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            answerPendingIntent = PendingIntent.getActivity(
+                this, 2, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            declinePendingIntent = PendingIntent.getBroadcast(
+                this, 3, declineIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         // Applying PendingIntents on buttons in customNotification
         customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
@@ -74,7 +105,8 @@ class NotificationService : Service() {
                     .build()
                 setSound(
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
-                    audioAttributes)
+                    audioAttributes
+                )
             }
             // Register the channel with the system
             intentFunction.notificationManager.createNotificationChannel(channel)
@@ -89,7 +121,6 @@ class NotificationService : Service() {
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(customNotification)
             .setCustomBigContentView(customNotification)
-            .setOngoing(true)
             .setVisibility(VISIBILITY_PUBLIC)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
 
@@ -105,7 +136,7 @@ class NotificationService : Service() {
             }
 
             override fun onFinish() {
-                intentFunction.cancelCall(destroyAlarmService = true)
+                intentFunction.cancelMethod(destroyAlarmService = true)
             }
         }
 

@@ -1,6 +1,5 @@
 package com.sawelo.infake.activity
 
-import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -32,20 +31,26 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var powerManager: PowerManager
     private lateinit var fragmentManager: FragmentManager
-    private lateinit var partialWakeLock: PowerManager.WakeLock
-    private lateinit var proximityWakeLock: PowerManager.WakeLock
+    private lateinit var intentFunction: IntentFunction
+
+    private var proximityWakeLock: PowerManager.WakeLock? = null
+    private var partialWakeLock: PowerManager.WakeLock? = null
 
     private var flutterFragment: FlutterFragment? = null
     private var mProximity: Sensor? = null
     private var useProximityWakeLock: Boolean = false
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call)
 
-        // Stop NotificationService
-        this.stopService(Intent(this, NotificationService::class.java))
+        intentFunction = IntentFunction(this)
+
+        // Stop everything except flutterEngine if CallActivity starts by pressing notification
+        val action = intent.action
+        if (action == NotificationService.INTENT_ACTION) {
+            intentFunction.cancelMethod(destroyFlutterEngine = false)
+        }
 
         // Setting up display switch (on/off) during call
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -59,7 +64,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         val sharedPref = SharedPrefFunction(this)
 
         fun initializeMethodCall(routeExtra: String) {
-            FlutterFunction().sendMethodCall(
+            FlutterFunction(this).sendContactToFlutter(
                 ContactData(
                     sharedPref.activeName,
                     sharedPref.activeNumber,
@@ -120,6 +125,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         if (!useProximityWakeLock) {
             sensorManager.registerListener(this, mProximity, 100000)
         }
+
     }
     override fun onPause() {
         super.onPause()
@@ -137,7 +143,7 @@ class CallActivity: FragmentActivity(), SensorEventListener {
              * */
             proximityWakeLock = powerManager.newWakeLock(
                 PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "infake::proximity_wake_lock")
-            proximityWakeLock.acquire(10*60*1000L)
+            proximityWakeLock?.acquire(10*60*1000L)
             useProximityWakeLock = true
         } else {
             /**
@@ -155,8 +161,8 @@ class CallActivity: FragmentActivity(), SensorEventListener {
 
     @Suppress("DEPRECATION")
     fun hideSystemUI() {
-        if (!partialWakeLock.isHeld) {
-            partialWakeLock.acquire(10*60*1000L)
+        if (partialWakeLock?.isHeld == false && partialWakeLock != null) {
+            partialWakeLock?.acquire(10*60*1000L)
         }
         window.decorView.systemUiVisibility = (
                 // Hide the nav bar and status bar
@@ -168,7 +174,9 @@ class CallActivity: FragmentActivity(), SensorEventListener {
 
     @Suppress("DEPRECATION")
     fun showSystemUI() {
-        if (partialWakeLock.isHeld) {partialWakeLock.release()}
+        if (partialWakeLock?.isHeld == true && partialWakeLock != null) {
+            partialWakeLock?.release()
+        }
         window.decorView.systemUiVisibility = 0
     }
 
@@ -215,10 +223,11 @@ class CallActivity: FragmentActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
-        if (!useProximityWakeLock) { sensorManager.unregisterListener(this) }
-        if (partialWakeLock.isHeld) {partialWakeLock.release()}
-        IntentFunction(this).cancelCall(destroyAlarmService = true)
-        Log.d("Destroy", "CallActivity is destroyed")
         super.onDestroy()
+        if (!useProximityWakeLock) { sensorManager.unregisterListener(this) }
+        if (proximityWakeLock?.isHeld == true) {proximityWakeLock?.release()}
+        if (partialWakeLock?.isHeld == true) {partialWakeLock?.release()}
+        intentFunction.cancelMethod(destroyAlarmService = true)
+        Log.d("Destroy", "CallActivity is destroyed")
     }
 }

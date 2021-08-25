@@ -1,5 +1,6 @@
 package com.sawelo.infake.service
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
@@ -64,8 +65,7 @@ class AlarmService: Service() {
                 intentFunction.callDeclineService(System.currentTimeMillis().toInt())
             )
 
-        // Cancel everything before starting alarm
-        intentFunction.cancelCall()
+        intentFunction.cancelMethod()
         startForeground(NOTIFICATION_ID, builder.build())
         return START_STICKY
     }
@@ -77,17 +77,16 @@ class AlarmService: Service() {
         // Create AlarmManager
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // Create Intent & PendingIntent to start FlutterReceiver
-//        flutterServicePendingIntent = if (Build.VERSION.SDK_INT >= 26) {
-//            PendingIntent.getForegroundService(
-//                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-//        } else {
-//            PendingIntent.getService(
-//                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-//        }
+        @SuppressLint("UnspecifiedImmutableFlag")
+        flutterServicePendingIntent = if (Build.VERSION.SDK_INT >= 23) {
+            PendingIntent.getService(
+                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
+        } else {
+            PendingIntent.getService(
+                this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        }
 
-        flutterServicePendingIntent = PendingIntent.getService(
-            this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
 
         val c: Calendar = Calendar.getInstance()
         if (sharedPref.timerType) {
