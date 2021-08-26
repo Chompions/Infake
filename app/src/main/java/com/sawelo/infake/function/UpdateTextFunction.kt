@@ -48,9 +48,23 @@ class UpdateTextFunction(context: Context) {
         when (scheduleData.timerType) {
             // This will return text for timer type
             true -> {
+                /**
+                 * Setting setHour and setMinute according to input, also limiting upper limit to
+                 * 24 hours and 60 minutes each. If setMinute goes beyond upper limit, then the rest
+                 * will be added to setHour.
+                 */
+
                 // Get incoming call exact starting time
-                val setHour = currentHour + dataHour
-                val setMinute = currentMinute + dataMinute
+                var setHour = (currentHour + dataHour) % 24
+                var setMinute = (currentMinute + dataMinute)
+                while (setMinute > 60) {
+                    setHour ++
+                    setMinute %= 60
+                }
+
+                // Set padding for setHour & setMinute
+                val hourPad: String = setHour.toString().padStart(2, '0')
+                val minutePad: String = setMinute.toString().padStart(2, '0')
 
                 val textHour: String = adjustNum(dataHour, "hour", "hours")
                 val textMinute = adjustNum(dataMinute, "minute", "minutes")
@@ -60,21 +74,22 @@ class UpdateTextFunction(context: Context) {
                 displayText =
                     if (textHour.isNotBlank() && textMinute.isNotBlank() && textSecond.isNotBlank()) {
                         // Use already existing data with updateRelativeTime() in digits
-                        // (ex. 00:00:00)
-                        val hourPad: String = sharedPref.relativeHour.toString().padStart(2, '0')
-                        val minutePad: String = sharedPref.relativeMinute.toString().padStart(2, '0')
-                        val secondPad: String = sharedPref.relativeSecond.toString().padStart(2, '0')
-                        "$hourPad:$minutePad:$secondPad"
+                        // (example text format = 00:00:00)
+                        val hourPadToDisplay: String = sharedPref.relativeHour.toString().padStart(2, '0')
+                        val minutePadToDisplay: String =
+                            sharedPref.relativeMinute.toString().padStart(2, '0')
+                        val secondPadToDisplay: String =
+                            sharedPref.relativeSecond.toString().padStart(2, '0')
+                        "$hourPadToDisplay:$minutePadToDisplay:$secondPadToDisplay"
                     } else {
+                        // Otherwise use sets of string to represent time
+                        // (example text format = 2 hours 3 minutes)
                         val builder = StringBuilder()
                         if (textHour.isNotBlank()) builder.append(" ").append(textHour)
                         if (textMinute.isNotBlank()) builder.append(" ").append(textMinute)
                         if (textSecond.isNotBlank()) builder.append(" ").append(textSecond)
                         builder.toString()
                     }
-
-                val hourPad: String = setHour.toString().padStart(2, '0')
-                val minutePad: String = setMinute.toString().padStart(2, '0')
 
                 // Set now or else
                 if (scheduleData.hour == 0 && scheduleData.minute == 0 && scheduleData.second == 0) {
@@ -103,7 +118,6 @@ class UpdateTextFunction(context: Context) {
                 if (textMinute.isNotBlank()) builder.append(" ").append(textMinute)
                 displayText = builder.toString()
 
-                // Set now or else
                 if (dataMinuteOfDay <= currentMinuteOfDay) {
                     mainScheduleText = "Now"
                     notificationText = "The call is starting now"

@@ -9,6 +9,8 @@ class SharedPrefFunction(context: Context) {
         const val ACTIVE_NAME = "ACTIVE_NAME"
         const val ACTIVE_NUMBER = "ACTIVE_NUMBER"
         const val ACTIVE_ROUTE = "ACTIVE_ROUTE"
+        const val IMAGE_BASE_64 = "IMAGE_BASE_64"
+        const val TEMP_IMAGE_BASE_64 = "TEMP_IMAGE_BASE_64"
 
         const val SPECIFIC_HOUR = "SPECIFIC_HOUR"
         const val SPECIFIC_MINUTE = "SPECIFIC_MINUTE"
@@ -18,8 +20,6 @@ class SharedPrefFunction(context: Context) {
         const val RELATIVE_SECOND = "RELATIVE_SECOND"
 
         const val TIMER_TYPE = "TIMER_TYPE"
-
-        const val IMAGE_BASE_64 = "IMAGE_BASE_64"
     }
     private val bitmapFunction = BitmapFunction(context)
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
@@ -28,10 +28,12 @@ class SharedPrefFunction(context: Context) {
     val editor: SharedPreferences.Editor = sharedPref.edit()
 
     // Retrieve data from sharedPref
-    val activeName= sharedPref.getString(ACTIVE_NAME, "Steve") ?: "DefaultName"
-    val activeNumber = sharedPref.getString(ACTIVE_NUMBER, "0123456789") ?: "DefaultNumber"
-    val activeRoute = sharedPref.getString(ACTIVE_ROUTE, "/InitialRoute") ?: "DefaultRoute"
-    val imageBase64 = sharedPref.getString(IMAGE_BASE_64, bitmapFunction.returnDefault()) ?: "DefaultImage"
+    val activeName= sharedPref.getString(ACTIVE_NAME, "Citra") ?: "Citra"
+    val activeNumber = sharedPref.getString(ACTIVE_NUMBER, "0123456789") ?: "0123456789"
+    val activeRoute = sharedPref.getString(ACTIVE_ROUTE, "/InitialRoute") ?: "/InitialRoute"
+    val imageBase64 = sharedPref.getString(IMAGE_BASE_64, bitmapFunction.returnDefault()) ?: bitmapFunction.returnDefault()
+    val tempImageBase64 = sharedPref.getString(TEMP_IMAGE_BASE_64, bitmapFunction.returnDefault()) ?: bitmapFunction.returnDefault()
+
 
     val specificHour = sharedPref.getInt(SPECIFIC_HOUR, 0)
     val specificMinute = sharedPref.getInt(SPECIFIC_MINUTE, 0)

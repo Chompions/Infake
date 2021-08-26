@@ -70,12 +70,19 @@ class WhatsAppIncomingCall extends StatelessWidget {
                           radius: 47.0,
                         ),
                       ),
-                      Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w300,
+                      Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8),
+                        child: Text(
+                          name,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 30.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
                       ),
                       Text(

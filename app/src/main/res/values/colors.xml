@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="cream">#F7FBF9</color>
+    <color name="alpha_cream">#80F7FBF9</color>
     <color name="blue_light">#97C1FF</color>
     <color name="blue_mid">#3D49F5</color>
     <color name="blue_dark">#2C2A66</color>

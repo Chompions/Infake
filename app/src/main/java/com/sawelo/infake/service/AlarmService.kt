@@ -86,8 +86,6 @@ class AlarmService: Service() {
                 this, 0, intentFunction.flutterServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         }
 
-
-
         val c: Calendar = Calendar.getInstance()
         if (sharedPref.timerType) {
             Log.d("AlarmService", "Using timerType")

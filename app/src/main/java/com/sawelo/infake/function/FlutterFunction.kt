@@ -19,25 +19,32 @@ class FlutterFunction (context: Context) {
     private val intentFunction = IntentFunction(mContext)
 
     fun createFlutterEngine() {
-        // Instantiate a FlutterEngine
-        flutterEngine = FlutterEngine(mContext)
+        /**
+         * This function will only run if flutterEngine is null
+         * Otherwise, use existing flutterEngineCache
+         */
 
-        // Start executing Dart code to pre-warm the FlutterEngine
-        flutterEngine?.dartExecutor?.executeDartEntrypoint(
-            DartExecutor.DartEntrypoint.createDefault()
-        )
+        if (flutterEngine == null) {
+            Log.d("FlutterFunction", "Flutter Engine is null")
 
-        // Cache the FlutterEngine
-        FlutterEngineCache
-            .getInstance()
-            .put("engine_id", flutterEngine)
+            // Instantiate a FlutterEngine
+            flutterEngine = FlutterEngine(mContext)
 
-        if (flutterEngine != null) {
-            Log.d("FlutterFunction", "Flutter Engine is initialized")
+            // Start executing Dart code to pre-warm the FlutterEngine
+            flutterEngine?.dartExecutor?.executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+            )
+
+            // Cache the FlutterEngine
+            FlutterEngineCache
+                .getInstance()
+                .put("engine_id", flutterEngine)
+
+            getCancelMethodFromFlutter()
+
+            Log.d("FlutterFunction", "Flutter Engine is created")
         } else
-            Log.d("FlutterFunction", "Flutter Engine is not initialized")
-
-        getCancelMethodFromFlutter()
+            Log.d("FlutterFunction", "Flutter Engine is not null")
     }
 
     fun sendContactToFlutter(contactData: ContactData) {

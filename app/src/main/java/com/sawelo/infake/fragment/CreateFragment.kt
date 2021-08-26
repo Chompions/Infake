@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.ContextCompat.startForegroundService
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.sawelo.infake.CreateViewModel
@@ -30,11 +31,11 @@ import java.util.*
 
 class CreateFragment : Fragment(R.layout.fragment_create) {
     private lateinit var photoResultLauncher: ActivityResultLauncher<Intent>
-
     private lateinit var requestContactPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var contactResultLauncher: ActivityResultLauncher<Void>
     private lateinit var sharedPref: SharedPrefFunction
     private lateinit var intentFunction: IntentFunction
+    private lateinit var bitmapFunction: BitmapFunction
 
     private var _binding: FragmentCreateBinding? = null
     private val binding get() = _binding!!
@@ -51,6 +52,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
         sharedPref = SharedPrefFunction(requireContext())
         intentFunction = IntentFunction(requireContext())
+        bitmapFunction = BitmapFunction(requireContext())
 
         // Clean up sharedPref before starting anything
         with(sharedPref.editor) {
@@ -64,8 +66,8 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             val data: Intent? = result.data
             if (result.resultCode == Activity.RESULT_OK && data != null) {
                 val imageUri: Uri = data.data!!
-                BitmapFunction(requireContext()).updateActivePhoto(
-                    imageUri, sharedPref, binding.contactPicture
+                bitmapFunction.updateActivePhoto(
+                    imageUri, sharedPref, binding
                 )
             }
         }
@@ -129,8 +131,8 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
                 if (hasPhoto) {
                     imageUri = Uri.parse(cursor.getString(4))
-                    BitmapFunction(requireContext()).updateActivePhoto(
-                        imageUri, sharedPref, binding.contactPicture
+                    bitmapFunction.updateActivePhoto(
+                        imageUri, sharedPref, binding
                     )
                 }
 
@@ -170,6 +172,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
         clearEditText(binding.contactName)
         clearEditText(binding.contactNumber)
+        binding.cancelImage.visibility = View.INVISIBLE
     }
 
     override fun onDestroyView() {
@@ -198,16 +201,26 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         }
     }
 
-    fun openImage() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
+    fun cancelImage() {
+        if (binding.cancelImage.visibility == View.VISIBLE) {
+            binding.contactPicture.setImageDrawable(ResourcesCompat.getDrawable(
+                resources, R.drawable.default_profile_picture, null))
+            binding.cancelImage.visibility = View.INVISIBLE
+
+            with(sharedPref.editor) {
+                remove(SharedPrefFunction.TEMP_IMAGE_BASE_64)
+                apply()
+            }
+            Log.d("CreateFragment", "Cleaning image data")
         }
+    }
+
+    fun openImage() {
+        val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
         photoResultLauncher.launch(intent)
     }
 
     fun openContact() {
-//        val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-//        contactResultLauncher.launch(intent)
         requestContactPermissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
     }
 
@@ -219,31 +232,34 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         // Put data from UI to sharedPref
         val sharedPref = SharedPrefFunction(requireContext())
 
-        // Check if string is blank as in -> ""
-        fun checkBlank(input: String, default: String): String {
-            return if (input.isBlank()) default else input
+        /**
+         * Check if string is blank as in -> "" to insert null
+         * Otherwise, use input string as value
+         */
+        fun checkBlank(input: String): String? {
+            println("Input string: $input")
+            return if (input.isBlank() || input.isEmpty()) {
+                println("Input string is blank or empty")
+                null
+            } else {
+                println("Input string is not blank or empty")
+                input
+            }
         }
 
         with(sharedPref.editor) {
-            putString(
-                SharedPrefFunction.ACTIVE_NAME,
-                checkBlank(binding.contactName.text.toString(), sharedPref.activeName)
-            )
-            putString(
-                SharedPrefFunction.ACTIVE_NUMBER,
-                checkBlank(binding.contactNumber.text.toString(), sharedPref.activeNumber)
-            )
+            putString(SharedPrefFunction.ACTIVE_NAME, checkBlank(binding.contactName.text.toString()))
+            putString(SharedPrefFunction.ACTIVE_NUMBER, checkBlank(binding.contactNumber.text.toString()))
+            putString(SharedPrefFunction.IMAGE_BASE_64, sharedPref.tempImageBase64)
 //            putString(SharedPrefFunction.ACTIVE_ROUTE, checkBlank("/WhatsAppIncomingCall", sharedPref.activeRoute))
             apply()
         }
-        // TODO: Change route input according to UI choices
 
-        Log.d(
-            "CreateFragment",
-            "Active data: ${sharedPref.activeName}, ${sharedPref.activeNumber}, ${sharedPref.activeRoute}"
-        )
-
-        Toast.makeText(requireContext(), "Profile created", Toast.LENGTH_SHORT).show()
+        if (model.mainScheduleText.value == "Now" || model.mainScheduleText.value == "Schedule Call") {
+            Toast.makeText(requireContext(), "Please wait for 10 seconds", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(requireContext(), "Profile created", Toast.LENGTH_SHORT).show()
+        }
 
         // Start AlarmService
         startForegroundService(requireContext(), intentFunction.alarmServiceIntent)

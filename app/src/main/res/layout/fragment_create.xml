@@ -49,59 +49,86 @@
                 app:layout_constraintTop_toBottomOf="@+id/imageView2"
                 app:layout_constraintVertical_bias="0.05" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/contact_picture_card_view"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="13dp"
-                app:cardCornerRadius="50dp"
-                android:onClick="@{() -> createFragment.openImage()}"
-                style="?attr/borderlessButtonStyle"
+            <RelativeLayout
+                android:id="@+id/contact_picture_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/button">
-                <ImageView
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent"
-                    android:id="@+id/contact_picture"
-                    android:src="@drawable/default_profile_picture"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="@string/contact_picture"/>
-            </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="13dp"
+                    app:cardCornerRadius="50dp"
+                    android:onClick="@{() -> createFragment.openImage()}"
+                    style="?attr/borderlessButtonStyle">
+
+                    <ImageView
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:id="@+id/contact_picture"
+                        android:src="@drawable/default_profile_picture"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/contact_picture"/>
+
+                    <View android:id="@+id/rectangle_under_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/alpha_cream"
+                        android:visibility="invisible"/>
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:visibility="invisible"
+                        />
+                </androidx.cardview.widget.CardView>
+
+            </RelativeLayout>
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/contact_name"
+                style="@style/ContactButton"
+                android:layout_height="48dp"
                 android:layout_marginTop="13dp"
-                android:hint="@string/contact_name"
-                android:inputType="text"
                 android:drawableStart="@drawable/ic_baseline_face"
                 android:drawableEnd="@drawable/ic_baseline_cancel"
-                style="@style/ContactButton"
+                android:hint="@string/contact_name"
+                android:textColorHint="@color/alpha_cream"
+                android:inputType="text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/contact_picture_card_view" />
+                app:layout_constraintTop_toBottomOf="@+id/contact_picture_layout" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/contact_number"
+                style="@style/ContactButton"
+                android:layout_height="48dp"
                 android:layout_marginTop="13dp"
-                android:hint="@string/contact_number"
-                android:inputType="phone"
                 android:drawableStart="@drawable/ic_baseline_call"
                 android:drawableEnd="@drawable/ic_baseline_cancel"
-                style="@style/ContactButton"
+                android:hint="@string/contact_number"
+                android:textColorHint="@color/alpha_cream"
+                android:inputType="phone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/contact_name" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/schedule_call_button"
+                style="@style/ContactButton"
+                android:layout_height="48dp"
                 android:layout_marginTop="13dp"
-                android:hint="@string/schedule_call"
-                android:text="@{viewModel.mainScheduleText}"
-                android:onClick="@{() -> createFragment.scheduleCall()}"
                 android:drawableStart="@drawable/ic_baseline_access_time"
                 android:drawableEnd="@drawable/ic_baseline_cancel_transparent"
-                style="@style/ContactButton"
+                android:hint="@string/schedule_call"
+                android:onClick="@{() -> createFragment.scheduleCall()}"
+                android:text="@{viewModel.mainScheduleText}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/contact_number" />
@@ -144,7 +171,6 @@
                         android:src="@drawable/whatsappimage"
                         />
 
-
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
             </HorizontalScrollView>
@@ -160,6 +186,20 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/call_screen_button" />
+
+            <ImageButton
+                android:id="@+id/cancel_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/ic_baseline_cancel_blue"
+                android:visibility="invisible"
+                android:onClick="@{() -> createFragment.cancelImage()}"
+                android:contentDescription="@string/cancel_image_desc"
+                style="?attr/borderlessButtonStyle"
+                app:layout_constraintBottom_toTopOf="@+id/contact_name"
+                app:layout_constraintStart_toEndOf="@+id/contact_picture_layout"
+                app:layout_constraintTop_toBottomOf="@+id/button" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
