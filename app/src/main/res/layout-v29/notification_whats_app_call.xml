@@ -63,8 +63,7 @@
             android:backgroundTint="@color/red"
             android:text="@string/decline"
             android:textColor="@color/white"
-            android:layout_marginEnd="6dp"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:layout_marginEnd="6dp" />
 
         <Button
             android:id="@+id/btnAnswer"
@@ -74,8 +73,7 @@
             android:backgroundTint="@color/green"
             android:text="@string/answer"
             android:textColor="@color/white"
-            android:layout_marginStart="6dp"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:layout_marginStart="6dp" />
 
     </LinearLayout>
 
