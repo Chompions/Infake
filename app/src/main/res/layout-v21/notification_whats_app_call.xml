@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
-                android:hint="@string/name"
+                android:text="@string/name"
                 android:textSize="14sp"
                 android:layout_marginBottom="1dp"
                 style="@style/TextAppearance.Compat.Notification.Title"/>
@@ -59,18 +59,22 @@
             android:layout_width="0dp"
             android:layout_height="55dp"
             android:layout_weight="1"
+            android:backgroundTint="@color/red"
             android:text="@string/decline"
             android:textColor="@color/white"
-            android:layout_marginEnd="6dp" />
+            android:layout_marginEnd="6dp"
+            style="?android:attr/buttonBarButtonStyle" />
 
         <Button
             android:id="@+id/btnAnswer"
             android:layout_width="0dp"
             android:layout_height="55dp"
             android:layout_weight="1"
+            android:backgroundTint="@color/green"
             android:text="@string/answer"
             android:textColor="@color/white"
-            android:layout_marginStart="6dp" />
+            android:layout_marginStart="6dp"
+            style="?android:attr/buttonBarButtonStyle" />
 
     </LinearLayout>
 

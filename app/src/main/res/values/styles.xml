@@ -17,4 +17,12 @@
         <item name="android:background">@drawable/btn_general_contact</item>
     </style>
 
+    <style name="NotificationButtonGreen" parent="TextAppearance.AppCompat">
+        <item name="android:background">@drawable/btn_notification_green</item>
+    </style>
+
+    <style name="NotificationButtonRed" parent="TextAppearance.AppCompat">
+        <item name="android:background">@drawable/btn_notification_red</item>
+    </style>
+
 </resources>

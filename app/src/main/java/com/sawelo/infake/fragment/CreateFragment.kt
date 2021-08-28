@@ -85,7 +85,10 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
 
         contactResultLauncher = registerForActivityResult(
             ActivityResultContracts.PickContact()
-        ) { contentUri ->
+        ) { Uri ->
+            val contentUri = Uri ?: android.net.Uri.parse(
+                "android.resource://com.sawelo.infake/drawable/default_profile_picture")
+
             println(contentUri)
 
             val contentResolver = requireContext().contentResolver
@@ -130,10 +133,12 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 }
 
                 if (hasPhoto) {
-                    imageUri = Uri.parse(cursor.getString(4))
-                    bitmapFunction.updateActivePhoto(
-                        imageUri, sharedPref, binding
-                    )
+                    imageUri = android.net.Uri.parse(cursor.getString(4))
+                    if (imageUri != null) {
+                        bitmapFunction.updateActivePhoto(
+                            imageUri, sharedPref, binding
+                        )
+                    }
                 }
 
                 println("Contact ID: $contactId")

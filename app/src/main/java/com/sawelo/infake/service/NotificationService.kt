@@ -15,7 +15,9 @@ import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import com.sawelo.infake.BuildConfig
 import com.sawelo.infake.R
 import com.sawelo.infake.activity.CallActivity
+import com.sawelo.infake.function.BitmapFunction
 import com.sawelo.infake.function.IntentFunction
+import com.sawelo.infake.function.SharedPrefFunction
 import java.util.concurrent.TimeUnit
 
 
@@ -35,11 +37,19 @@ class NotificationService : Service() {
         Log.d("NotificationService", "Starting NotificationService")
 
         val intentFunction = IntentFunction(this)
+        val sharedPref = SharedPrefFunction(this)
+        val bitmapFunction = BitmapFunction(this)
+
+        val roundedBitmap = bitmapFunction.getCircleBitmap(
+            bitmapFunction.convertBase64ToBitmap(sharedPref.imageBase64)
+        )
 
         // Create RemoteViews with custom layout
-        val customNotification = RemoteViews(
-            BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call
-        )
+        val customNotificationLayout = RemoteViews(
+            BuildConfig.APPLICATION_ID, R.layout.notification_whats_app_call).apply {
+                setImageViewBitmap(R.id.notification_picture, roundedBitmap)
+            setTextViewText(R.id.notification_name, sharedPref.activeName)
+        }
 
         // Initialize Intents
         val defaultIntent = Intent(this, CallActivity::class.java)
@@ -89,8 +99,8 @@ class NotificationService : Service() {
         }
 
         // Applying PendingIntents on buttons in customNotification
-        customNotification.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
-        customNotification.setOnClickPendingIntent(R.id.btnDecline, declinePendingIntent)
+        customNotificationLayout.setOnClickPendingIntent(R.id.btnAnswer, answerPendingIntent)
+        customNotificationLayout.setOnClickPendingIntent(R.id.btnDecline, declinePendingIntent)
 
         // Create NotificationChannel only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -119,8 +129,7 @@ class NotificationService : Service() {
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setFullScreenIntent(defaultPendingIntent, true)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(customNotification)
-            .setCustomBigContentView(customNotification)
+            .setCustomContentView(customNotificationLayout)
             .setVisibility(VISIBILITY_PUBLIC)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
 

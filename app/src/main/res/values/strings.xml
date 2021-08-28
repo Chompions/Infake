@@ -18,4 +18,8 @@
     <string name="ok">OK</string>
     <string name="contact_picture">Contact Picture</string>
     <string name="cancel_image_desc">Cancel profile picture</string>
+    <string name="answer">Answer</string>
+    <string name="decline">Decline</string>
+    <string name="incoming_voice_call">Incoming voice call</string>
+    <string name="name">Name</string>
 </resources>
