@@ -6,8 +6,9 @@ import 'dart:math' as math;
 
 class ArrowStack extends StatefulWidget {
   final AnimationController controller;
+  final Color middleArrowColor;
 
-  ArrowStack({this.controller});
+  ArrowStack({this.controller, this.middleArrowColor});
 
   @override
   _ArrowStackState createState() => _ArrowStackState();
@@ -41,7 +42,7 @@ class _ArrowStackState extends State<ArrowStack> {
             radius: 1,
             colors: [
               Colors.white,
-              Color(0xFF1F2831),
+              widget.middleArrowColor,
             ],
             // tileMode: TileMode.mirror,
           ).createShader(rect);

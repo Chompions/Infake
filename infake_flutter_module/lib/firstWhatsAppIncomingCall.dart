@@ -3,22 +3,15 @@ import 'dart:convert';
 import 'package:infake_flutter_module/utilities/waBottomButton.dart';
 import 'package:flutter/material.dart';
 
-class WhatsAppIncomingCall extends StatelessWidget {
+class FirstWhatsAppIncomingCall extends StatelessWidget {
   final String name;
   final String number;
   final String imageEncoded;
 
-  WhatsAppIncomingCall(this.name, this.number, this.imageEncoded);
+  FirstWhatsAppIncomingCall(this.name, this.number, this.imageEncoded);
 
   @override
   Widget build(BuildContext context) {
-    print("Name: $name");
-    print("Number: $number");
-    print("Image: $imageEncoded");
-
-    String cleanImageEncoded = base64.normalize(
-        imageEncoded.replaceAll(RegExp(r"\s+"), ""));
-
     return Material(
       child: Column(
         children: <Widget>[
@@ -65,15 +58,14 @@ class WhatsAppIncomingCall extends StatelessWidget {
                           ],
                         ),
                         child: CircleAvatar(
-                          backgroundImage: MemoryImage(
-                              base64.decode(cleanImageEncoded)),
+                          backgroundImage:
+                              MemoryImage(base64.decode(imageEncoded)),
                           radius: 47.0,
                         ),
                       ),
                       Container(
                         alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
                           name,
                           overflow: TextOverflow.ellipsis,
@@ -109,7 +101,11 @@ class WhatsAppIncomingCall extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  BottomButton(name),
+                  BottomButton(
+                    nextRoute: "/FirstWhatsAppOngoingCall",
+                    sideButtonColor: Color(0xFF1A2227),
+                    middleArrowColor: Color(0xFF1F2831),
+                  ),
                   SizedBox(
                     height: 15,
                   ),

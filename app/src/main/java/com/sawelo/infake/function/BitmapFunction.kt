@@ -15,6 +15,9 @@ import java.io.ByteArrayOutputStream
 
 
 
+
+
+
 class BitmapFunction(context: Context) {
     private val mContext: Context = context
 
@@ -80,7 +83,7 @@ class BitmapFunction(context: Context) {
     private fun convertBitmapToBase64(bitmap: Bitmap): String {
         Log.d("BitmapFunction", "Converting Bitmap")
         val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 30, byteArrayOutputStream)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
@@ -98,23 +101,22 @@ class BitmapFunction(context: Context) {
      * Cropping bitmap input into rounded bitmap
      */
     fun getCircleBitmap(bitmap: Bitmap): Bitmap? {
-        val output = Bitmap.createBitmap(
-            bitmap.width,
-            bitmap.height, Bitmap.Config.ARGB_8888
+        val width: Int = bitmap.width
+        val height: Int = bitmap.height
+        val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+        val path = Path()
+        path.addCircle(
+            (width / 2).toFloat(),
+            (height / 2).toFloat(),
+            width.coerceAtMost(height / 2).toFloat(),
+            Path.Direction.CCW
         )
-        val canvas = Canvas(output)
-        val color = Color.RED
-        val paint = Paint()
-        val rect = Rect(0, 0, bitmap.width, bitmap.height)
-        val rectF = RectF(rect)
-        paint.isAntiAlias = true
-        canvas.drawARGB(0, 0, 0, 0)
-        paint.color = color
-        canvas.drawOval(rectF, paint)
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(bitmap, rect, rect, paint)
-        bitmap.recycle()
-        return output
+
+        val canvas = Canvas(outputBitmap)
+        canvas.clipPath(path)
+        canvas.drawBitmap(bitmap, 0F, 0F, null)
+        return outputBitmap
     }
 
     /**

@@ -2,8 +2,9 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:infake_flutter_module/whatsAppIncomingCall.dart';
-import 'package:infake_flutter_module/whatsAppOngoingCall.dart';
+import 'package:infake_flutter_module/firstWhatsAppIncomingCall.dart';
+import 'package:infake_flutter_module/firstWhatsAppOngoingCall.dart';
+import 'package:infake_flutter_module/secondWhatsAppIncomingCall.dart';
 
 void main() => runApp(FakeCall());
 
@@ -51,17 +52,22 @@ class _FakeCallState extends State<FakeCall> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: "Fake Call",
       navigatorKey: navigatorKey,
       theme: ThemeData(
         fontFamily: 'HelveticNeue',
       ),
-      initialRoute: "/InitialRoute",
+      initialRoute: "/MenuTestRoute",
       routes: {
         "/InitialRoute": (context) => InitialRoute(),
-        "/WhatsAppIncomingCall": (context) => WhatsAppIncomingCall(
+        "/MenuTestRoute": (context) => MenuTestRoute(),
+        "/FirstWhatsAppIncomingCall": (context) => FirstWhatsAppIncomingCall(
             name, number, imageEncoded),
-        "/WhatsAppOngoingCall": (context) => WhatsAppOngoingCall(),
+        "/FirstWhatsAppOngoingCall": (context) => FirstWhatsAppOngoingCall(
+            name, number, imageEncoded),
+        "/SecondWhatsAppIncomingCall": (context) => SecondWhatsAppIncomingCall(
+            name, number, imageEncoded),
       },
     );
   }
@@ -74,6 +80,31 @@ class InitialRoute extends StatelessWidget {
       child: Container(
         color: Colors.black38,
       ),
+    );
+  }
+}
+
+class MenuTestRoute extends StatelessWidget {
+  final items = [
+    "/FirstWhatsAppIncomingCall",
+    "/FirstWhatsAppOngoingCall",
+    "/SecondWhatsAppIncomingCall"];
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: ListView.builder(
+        itemCount: items.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(items[index]),
+              onTap: () {
+                Navigator.pushNamed(
+                  context, items[index]
+                );
+              },
+            );
+          })
     );
   }
 }

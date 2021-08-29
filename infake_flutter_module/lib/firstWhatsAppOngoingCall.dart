@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
-class WhatsAppOngoingCall extends StatelessWidget {
+class FirstWhatsAppOngoingCall extends StatelessWidget {
+  final String name;
+  final String number;
+  final String imageEncoded;
+
+  FirstWhatsAppOngoingCall(this.name, this.number, this.imageEncoded);
+
   @override
   Widget build(BuildContext context) {
     startCancelMethodToAndroid();
@@ -67,12 +75,19 @@ class WhatsAppOngoingCall extends StatelessWidget {
                         )
                       ],
                     ),
-                    Text(
-                      "Placeholder Name",
-                      style: TextStyle(
-                        fontSize: 28.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
+                    Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8),
+                      child: Text(
+                        name,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 28.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
                     ),
                     TickingTimer(),
@@ -89,6 +104,10 @@ class WhatsAppOngoingCall extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
+                    image: DecorationImage(
+                      image: MemoryImage(base64.decode(imageEncoded)),
+                      fit: BoxFit.fitHeight,
+                    ),
                   ),
                 ),
                 Positioned(

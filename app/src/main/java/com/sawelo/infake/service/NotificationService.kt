@@ -117,6 +117,7 @@ class NotificationService : Service() {
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
                     audioAttributes
                 )
+                vibrationPattern = longArrayOf(1000, 1000)
             }
             // Register the channel with the system
             intentFunction.notificationManager.createNotificationChannel(channel)
@@ -132,6 +133,7 @@ class NotificationService : Service() {
             .setCustomContentView(customNotificationLayout)
             .setVisibility(VISIBILITY_PUBLIC)
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+            .setVibrate(longArrayOf(1000, 1000))
 
         val buildNotification: Notification = builder.build().apply {
             this.flags = Notification.FLAG_INSISTENT

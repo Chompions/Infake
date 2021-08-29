@@ -5,11 +5,11 @@ import 'dart:async';
 import 'waMiddleButton.dart';
 
 class BottomButton extends StatefulWidget {
-  final String name;
-  // final File image;
+  final String nextRoute;
+  final Color sideButtonColor;
+  final Color middleArrowColor;
 
-  // BottomButton(this.name, this.image);
-  BottomButton(this.name);
+  BottomButton({this.nextRoute, this.sideButtonColor, this.middleArrowColor});
 
   @override
   _BottomButtonState createState() => _BottomButtonState();
@@ -87,6 +87,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
               ),
               ArrowStack(
                 controller: _controller,
+                middleArrowColor: widget.middleArrowColor,
               ),
               GestureDetector(
                 onPanStart: (details) {
@@ -103,7 +104,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
                 onPanEnd: (details) {
                   setState(() {
                     if (_buttonPosition == -200.0) {
-                      Navigator.popAndPushNamed(context, '/WhatsAppOngoingCall');
+                      Navigator.popAndPushNamed(context, widget.nextRoute);
                     } else {
                       _buttonPosition = 0.0;
                       _visibleAnimation = true;
@@ -138,7 +139,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
             SystemNavigator.pop();
           },
           elevation: 0,
-          fillColor: Color(0xFF1A2227),
+          fillColor: widget.sideButtonColor,
           child: Icon(
             MyFlutterApp.message_reply,
             size: 20,
