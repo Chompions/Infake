@@ -64,7 +64,7 @@ class _BottomButtonState extends State<BottomButton> with TickerProviderStateMix
             SystemNavigator.pop();
           },
           elevation: 0,
-          fillColor: Color(0xFF1A2227),
+          fillColor: widget.sideButtonColor,
           child: Icon(
             Icons.call_end,
             size: 27,

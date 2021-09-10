@@ -11,13 +11,6 @@ import android.view.View
 import com.sawelo.infake.databinding.FragmentCreateBinding
 import java.io.ByteArrayOutputStream
 
-
-
-
-
-
-
-
 class BitmapFunction(context: Context) {
     private val mContext: Context = context
 
@@ -101,22 +94,27 @@ class BitmapFunction(context: Context) {
      * Cropping bitmap input into rounded bitmap
      */
     fun getCircleBitmap(bitmap: Bitmap): Bitmap? {
-        val width: Int = bitmap.width
-        val height: Int = bitmap.height
-        val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-
-        val path = Path()
-        path.addCircle(
-            (width / 2).toFloat(),
-            (height / 2).toFloat(),
-            width.coerceAtMost(height / 2).toFloat(),
-            Path.Direction.CCW
+        val output = Bitmap.createBitmap(
+            bitmap.width,
+            bitmap.height, Bitmap.Config.ARGB_8888
         )
+        val canvas = Canvas(output)
 
-        val canvas = Canvas(outputBitmap)
-        canvas.clipPath(path)
-        canvas.drawBitmap(bitmap, 0F, 0F, null)
-        return outputBitmap
+        val color = -0xbdbdbe
+        val paint = Paint()
+        val rect = Rect(0, 0, bitmap.width, bitmap.height)
+
+        paint.isAntiAlias = true
+        canvas.drawARGB(0, 0, 0, 0)
+        paint.color = color
+
+        canvas.drawCircle(
+            bitmap.width.toFloat() / 2, bitmap.height.toFloat() / 2,
+            bitmap.width.toFloat() / 2, paint
+        )
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(bitmap, rect, rect, paint)
+        return output
     }
 
     /**

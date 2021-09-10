@@ -14,6 +14,7 @@
     <color name="alpha_cream">#80F7FBF9</color>
     <color name="blue_light">#97C1FF</color>
     <color name="blue_mid">#3D49F5</color>
+    <color name="blue_mid_transparent">#803D49F5</color>
     <color name="blue_dark">#2C2A66</color>
     <color name="blue_darker">#0D0D11</color>
 

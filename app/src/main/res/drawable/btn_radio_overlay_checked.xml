@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:src="@drawable/first_whatsapp"/>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <size android:height="311dp" android:width="151dp" />
+            <solid android:color="@color/blue_mid_transparent"/>
+        </shape>
+    </item>
+</layer-list>

@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/infake_flutter_module" />
             <option value="$PROJECT_DIR$/infake_flutter_module/.android/Flutter" />
+            <option value="$PROJECT_DIR$/../../../../../src/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_statusbar_manager-2.0.0/android" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

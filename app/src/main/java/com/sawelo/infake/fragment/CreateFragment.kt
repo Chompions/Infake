@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.*
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.util.Log
@@ -12,6 +16,8 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -174,6 +180,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             createFragment = this@CreateFragment
             lifecycleOwner = viewLifecycleOwner
         }
+        createRadioButton()
 
         clearEditText(binding.contactName)
         clearEditText(binding.contactNumber)
@@ -204,6 +211,55 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                 return@setOnTouchListener false
             }
         }
+    }
+
+    private fun createRadioButton() {
+        val availableScreen = SharedPrefFunction.AVAILABLE_SCREEN_IN_FLUTTER
+        Log.d("CreateFragment", "Keys are ${availableScreen.keys}")
+        Log.d("CreateFragment", "Size is ${availableScreen.size}")
+
+        val radioGroup = requireView().findViewById<RadioGroup>(R.id.call_screen_radio_group)
+        val radioButtonArray = arrayOfNulls<RadioButton>(availableScreen.size)
+        var index = 0
+
+        availableScreen.forEach { screen ->
+            val resId = requireContext().resources.getIdentifier(
+                screen.key, "drawable", requireContext().packageName
+            )
+            radioButtonArray[index] = RadioButton(requireContext()).apply {
+                buttonDrawable = screenStateSelector(resId)
+                setPadding(0,0,10,0)
+            }
+            radioGroup.addView(radioButtonArray[index])
+            index++
+        }
+
+    }
+
+    @Suppress("Deprecation")
+    fun screenStateSelector(bitmapId: Int): StateListDrawable {
+        val bitmap: Bitmap = BitmapFactory.decodeResource(resources, bitmapId)
+        val scaledDownBitmap = Bitmap.createScaledBitmap(
+            bitmap, 300, 600, true)
+
+        val layer1 = BitmapDrawable(requireContext().resources, scaledDownBitmap)
+        val layer2 = if (Build.VERSION.SDK_INT >= 23) {
+            ColorDrawable(resources.getColor(R.color.blue_mid_transparent, null))
+        } else {
+            ColorDrawable(resources.getColor(R.color.blue_mid_transparent))
+        }
+        val mixLayer = LayerDrawable(arrayOf(layer1, layer2))
+
+        /**
+         * Use mixLayer to show layer-list with blue overlay
+         * Use layer1 to show only the required bitmap
+         */
+        val res: StateListDrawable = StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_checked), mixLayer)
+            addState(intArrayOf(-android.R.attr.state_checked), layer1)
+
+        }
+        return res
     }
 
     fun cancelImage() {

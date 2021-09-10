@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_statusbar_manager/flutter_statusbar_manager.dart';
+import 'package:infake_flutter_module/main.dart';
 import 'package:infake_flutter_module/utilities/waBottomButton.dart';
 import 'package:flutter/material.dart';
 
@@ -83,7 +84,7 @@ class SecondWhatsAppIncomingCall extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   BottomButton(
-                      nextRoute : "/FirstWhatsAppOngoingCall",
+                      nextRoute : FakeCall.SECOND_WHATSAPP_ONGOING_ROUTE,
                       sideButtonColor: Color(0xFF0A3734),
                       middleArrowColor: Color(0xFF054C44),
                   ),

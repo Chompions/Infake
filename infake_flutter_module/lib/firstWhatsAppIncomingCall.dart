@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:infake_flutter_module/main.dart';
 import 'package:infake_flutter_module/utilities/waBottomButton.dart';
 import 'package:flutter/material.dart';
 
@@ -102,7 +103,7 @@ class FirstWhatsAppIncomingCall extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   BottomButton(
-                    nextRoute: "/FirstWhatsAppOngoingCall",
+                    nextRoute: FakeCall.FIRST_WHATSAPP_ONGOING_ROUTE,
                     sideButtonColor: Color(0xFF1A2227),
                     middleArrowColor: Color(0xFF1F2831),
                   ),

@@ -20,6 +20,10 @@ class SharedPrefFunction(context: Context) {
         const val RELATIVE_SECOND = "RELATIVE_SECOND"
 
         const val TIMER_TYPE = "TIMER_TYPE"
+
+        val AVAILABLE_SCREEN_IN_FLUTTER = mapOf(
+            "first_whatsapp" to "/FirstWhatsAppIncomingCall",
+            "second_whatsapp" to "/SecondWhatsAppIncomingCall")
     }
     private val bitmapFunction = BitmapFunction(context)
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
