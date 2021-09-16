@@ -11,16 +11,10 @@ class SecondWhatsAppIncomingCall extends StatelessWidget {
   final String imageEncoded;
 
   SecondWhatsAppIncomingCall(this.name, this.number, this.imageEncoded);
-  
-  Future setUiColor(Color color) async {
-    await FlutterStatusbarManager.setColor(color);
-    await FlutterStatusbarManager.setNavigationBarColor(color);
-  }
 
   @override
   Widget build(BuildContext context) {
     Color _greenWhatsApp = Color(0xFF054C44);
-    setUiColor(_greenWhatsApp);
     
     return Material(
       color: _greenWhatsApp,

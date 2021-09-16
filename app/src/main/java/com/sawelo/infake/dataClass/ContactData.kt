@@ -1,4 +1,4 @@
-package com.sawelo.infake
+package com.sawelo.infake.dataClass
 
 data class ContactData(
     val name: String,

@@ -11,19 +11,22 @@ import android.view.LayoutInflater
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import com.sawelo.infake.CreateViewModel
 import com.sawelo.infake.R
-import com.sawelo.infake.ScheduleData
+import com.sawelo.infake.dataClass.ScheduleData
 import com.sawelo.infake.databinding.DialogSpecificScheduleBinding
+import com.sawelo.infake.function.CreateFragmentFunction
+import com.sawelo.infake.viewModel.CreateViewModel
 import java.util.*
 
 class ScheduleSpecificFragment : DialogFragment(), TimePicker.OnTimeChangedListener {
+    private lateinit var createFragmentFunction: CreateFragmentFunction
     private lateinit var _binding: DialogSpecificScheduleBinding
     private val binding get() = _binding
 
     private val model: CreateViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        createFragmentFunction = CreateFragmentFunction(requireContext(), model)
         _binding = DialogSpecificScheduleBinding
             .inflate(LayoutInflater.from(context))
 
@@ -55,12 +58,15 @@ class ScheduleSpecificFragment : DialogFragment(), TimePicker.OnTimeChangedListe
         }
 
         binding.okBtn.setOnClickListener{
-            model.mainSetTime(requireContext(), ScheduleData(
+            createFragmentFunction.mainSetTime(
+                ScheduleData(
                 timerType = false,
-                hour = model.specificHourNum.value,
-                minute = model.specificMinuteNum.value
-            ))
-            model.dismissMenuDialog(fragment = this@ScheduleSpecificFragment)
+                specificHour = model.specificHourNum.value ?: 0,
+                specificMinute = model.specificMinuteNum.value ?: 0)
+            )
+            println("ScheduleSpecificFragment, Hour: ${model.specificHourNum.value}")
+            println("ScheduleSpecificFragment, Minute: ${model.specificMinuteNum.value}")
+            createFragmentFunction.dismissMenuDialog(fragment = this@ScheduleSpecificFragment)
             dialog?.dismiss()
         }
 

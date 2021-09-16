@@ -12,8 +12,9 @@ import android.view.View
 import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import com.sawelo.infake.ContactData
 import com.sawelo.infake.R
+import com.sawelo.infake.`object`.StaticObject
+import com.sawelo.infake.dataClass.ContactData
 import com.sawelo.infake.function.FlutterFunction
 import com.sawelo.infake.function.IntentFunction
 import com.sawelo.infake.function.SharedPrefFunction
@@ -70,7 +71,8 @@ class CallActivity: FragmentActivity(), SensorEventListener {
                     sharedPref.activeNumber,
                     routeExtra,
                     sharedPref.imageBase64
-                ))
+                )
+            )
             Log.d("CallActivity", "name: ${sharedPref.activeName}")
             Log.d("CallActivity", "number: ${sharedPref.activeNumber}")
             Log.d("CallActivity", "routeExtra: $routeExtra")
@@ -78,10 +80,15 @@ class CallActivity: FragmentActivity(), SensorEventListener {
         }
 
         val route = intent.extras?.getString("route")
+        val incomingRouteName = sharedPref.activeIncomingRouteName
+        val ongoingRouteName = StaticObject.screenRouteList.single {
+            it.incomingRouteName == incomingRouteName
+        }.ongoingRouteName
+
         if (route != null) {
             when (route) {
-                "defaultIntent" -> initializeMethodCall("/WhatsAppIncomingCall")
-                "answerIntent" -> initializeMethodCall("/WhatsAppOngoingCall")
+                "defaultIntent" -> initializeMethodCall(incomingRouteName)
+                "answerIntent" -> initializeMethodCall(ongoingRouteName)
             }
         }
 

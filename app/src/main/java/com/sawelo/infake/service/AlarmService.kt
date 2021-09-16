@@ -9,9 +9,9 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.sawelo.infake.R
+import com.sawelo.infake.`object`.UpdateTextObject
 import com.sawelo.infake.function.IntentFunction
 import com.sawelo.infake.function.SharedPrefFunction
-import com.sawelo.infake.function.UpdateTextFunction
 import java.util.*
 
 class AlarmService: Service() {
@@ -50,8 +50,9 @@ class AlarmService: Service() {
         // Determine which alarm to set according to user choice
         setAlarm()
         val (_, notificationText) =
-            UpdateTextFunction(this)
-                .updateMainText(sharedPref.scheduleData)
+            UpdateTextObject.updateMainText(sharedPref.scheduleData())
+        println("SharedPref Data: ${sharedPref.scheduleData()}")
+        println("NotificationText: $notificationText")
 
         // Build Notification
         builder = NotificationCompat.Builder(this, CHANNEL_ID)

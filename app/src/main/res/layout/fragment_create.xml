@@ -8,7 +8,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.sawelo.infake.CreateViewModel" />
+            type="com.sawelo.infake.viewModel.CreateViewModel" />
         <variable
             name="createFragment"
             type="com.sawelo.infake.fragment.CreateFragment" />
@@ -36,13 +36,12 @@
                 android:contentDescription="@string/add_profile_desc" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button"
+                android:id="@+id/use_existing_contact"
                 style="@style/ButtonText"
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/btn_use_existing_contact"
                 android:text="@string/use_existing_contact"
-                android:onClick="@{() -> createFragment.openContact()}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -55,14 +54,14 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button">
+                app:layout_constraintTop_toBottomOf="@+id/use_existing_contact">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/contact_picture_card_view"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_marginTop="13dp"
                     app:cardCornerRadius="50dp"
-                    android:onClick="@{() -> createFragment.openImage()}"
                     style="?attr/borderlessButtonStyle">
 
                     <ImageView
@@ -127,7 +126,6 @@
                 android:drawableStart="@drawable/ic_baseline_access_time"
                 android:drawableEnd="@drawable/ic_baseline_cancel_transparent"
                 android:hint="@string/schedule_call"
-                android:onClick="@{() -> createFragment.scheduleCall()}"
                 android:text="@{viewModel.mainScheduleText}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -158,7 +156,6 @@
                 android:hint="@string/create_profile"
                 android:text="@string/create_profile"
                 android:textSize="24sp"
-                android:onClick="@{() -> createFragment.createProfile()}"
                 style="@style/ContactButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -171,12 +168,11 @@
                 android:layout_marginStart="10dp"
                 android:src="@drawable/ic_baseline_cancel_blue"
                 android:visibility="invisible"
-                android:onClick="@{() -> createFragment.cancelImage()}"
                 android:contentDescription="@string/cancel_image_desc"
                 style="?attr/borderlessButtonStyle"
                 app:layout_constraintBottom_toTopOf="@+id/contact_name"
                 app:layout_constraintStart_toEndOf="@+id/contact_picture_layout"
-                app:layout_constraintTop_toBottomOf="@+id/button" />
+                app:layout_constraintTop_toBottomOf="@+id/use_existing_contact" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

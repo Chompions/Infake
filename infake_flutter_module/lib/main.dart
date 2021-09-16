@@ -69,7 +69,7 @@ class _FakeCallState extends State<FakeCall> {
        * Change this to /MenuTestRoute for testing
        * Otherwise, use /InitialRoute to be used as blank page
        */
-      initialRoute: "/MenuTestRoute",
+      initialRoute: "/InitialRoute",
       routes: {
         FakeCall.INITIAL_ROUTE: (context) => InitialRoute(),
         FakeCall.MENU_TEST_ROUTE: (context) => MenuTestRoute(),

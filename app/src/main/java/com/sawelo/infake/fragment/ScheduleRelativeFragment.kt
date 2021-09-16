@@ -11,21 +11,23 @@ import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import com.sawelo.infake.CreateViewModel
 import com.sawelo.infake.R
-import com.sawelo.infake.ScheduleData
+import com.sawelo.infake.`object`.StaticObject
+import com.sawelo.infake.dataClass.ScheduleData
 import com.sawelo.infake.databinding.DialogRelativeScheduleBinding
-
-
+import com.sawelo.infake.function.CreateFragmentFunction
+import com.sawelo.infake.viewModel.CreateViewModel
 
 
 class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeListener {
+    private lateinit var createFragmentFunction: CreateFragmentFunction
     private lateinit var _binding: DialogRelativeScheduleBinding
     private val binding get() = _binding
 
     private val model: CreateViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        createFragmentFunction = CreateFragmentFunction(requireContext(), model)
         _binding = DialogRelativeScheduleBinding
             .inflate(LayoutInflater.from(context))
 
@@ -66,13 +68,15 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
         }
 
         binding.okBtn.setOnClickListener{
-            model.mainSetTime(requireContext(), ScheduleData(
+            createFragmentFunction.mainSetTime(
+                ScheduleData(
                 timerType = true,
-                hour = model.relativeHourNum.value,
-                minute = model.relativeMinuteNum.value,
-                second = model.relativeSecondNum.value
-            ))
-            model.dismissMenuDialog(fragment = this@ScheduleRelativeFragment)
+                relativeHour = model.relativeHourNum.value ?: 0,
+                relativeMinute = model.relativeMinuteNum.value ?: 0,
+                relativeSecond = model.relativeSecondNum.value ?: 0
+            )
+            )
+            createFragmentFunction.dismissMenuDialog(fragment = this@ScheduleRelativeFragment)
             dialog?.dismiss()
         }
 
@@ -86,6 +90,18 @@ class ScheduleRelativeFragment : DialogFragment(), NumberPicker.OnValueChangeLis
     }
 
     override fun onValueChange(picker: NumberPicker?, oldVal: Int, newVal: Int) {
-        model.updateRelativeTime(picker, binding, newVal)
+        if (picker != null) {
+            when (picker.id) {
+                this.binding.relativeTimeHour.id -> model.updateRelativeTime(
+                    Pair(StaticObject.TimeEnum.HOUR.name, newVal)
+                )
+                this.binding.relativeTimeMinute.id -> model.updateRelativeTime(
+                    Pair(StaticObject.TimeEnum.MINUTE.name, newVal)
+                )
+                this.binding.relativeTimeSecond.id -> model.updateRelativeTime(
+                    Pair(StaticObject.TimeEnum.SECOND.name, newVal)
+                )
+            }
+        }
     }
 }

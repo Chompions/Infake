@@ -26,12 +26,15 @@ import androidx.core.content.ContextCompat.startForegroundService
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.sawelo.infake.CreateViewModel
+import androidx.lifecycle.Observer
 import com.sawelo.infake.R
+import com.sawelo.infake.`object`.StaticObject
+import com.sawelo.infake.dataClass.FlutterScreenData
 import com.sawelo.infake.databinding.FragmentCreateBinding
 import com.sawelo.infake.function.BitmapFunction
 import com.sawelo.infake.function.IntentFunction
 import com.sawelo.infake.function.SharedPrefFunction
+import com.sawelo.infake.viewModel.CreateViewModel
 import java.util.*
 
 
@@ -42,6 +45,9 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
     private lateinit var sharedPref: SharedPrefFunction
     private lateinit var intentFunction: IntentFunction
     private lateinit var bitmapFunction: BitmapFunction
+
+    private var activeRouteValue: String? = null
+    private val mapIdRoute = mutableMapOf<Int, FlutterScreenData>()
 
     private var _binding: FragmentCreateBinding? = null
     private val binding get() = _binding!!
@@ -93,7 +99,8 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             ActivityResultContracts.PickContact()
         ) { Uri ->
             val contentUri = Uri ?: android.net.Uri.parse(
-                "android.resource://com.sawelo.infake/drawable/default_profile_picture")
+                "android.resource://com.sawelo.infake/drawable/default_profile_picture"
+            )
 
             println(contentUri)
 
@@ -132,8 +139,11 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
                     )
 
                     if (numberCursor?.moveToNext() == true) {
-                        contactNumber = numberCursor.getString(numberCursor.getColumnIndex(
-                            ContactsContract.CommonDataKinds.Phone.DATA1))
+                        contactNumber = numberCursor.getString(
+                            numberCursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.DATA1
+                            )
+                        )
                     }
                     numberCursor?.close()
                 }
@@ -180,7 +190,24 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
             createFragment = this@CreateFragment
             lifecycleOwner = viewLifecycleOwner
         }
+
+        val mainScheduleTextObserver = Observer<String> {
+            binding.scheduleCallButton.text = it
+        }
+        model.mainScheduleText.observe(viewLifecycleOwner, mainScheduleTextObserver)
+
+        binding.useExistingContact.setOnClickListener { openContact() }
+        binding.contactPictureCardView.setOnClickListener { openImage() }
+        binding.cancelImage.setOnClickListener { cancelImage() }
+        binding.scheduleCallButton.setOnClickListener { scheduleCall() }
+        binding.createProfileButton.setOnClickListener { createProfile() }
+
+        // Radio button
         createRadioButton()
+        binding.callScreenRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            Log.d("CreateFragment", "CheckedId is: $checkedId")
+            activeRouteValue = mapIdRoute[checkedId]?.incomingRouteName
+        }
 
         clearEditText(binding.contactName)
         clearEditText(binding.contactNumber)
@@ -193,7 +220,7 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun clearEditText(appCompatEditText: AppCompatEditText) {
+    private fun clearEditText(appCompatEditText: AppCompatEditText) {
         appCompatEditText.setOnTouchListener { _, event ->
             val drawableRight = 2
             val checkAction: Boolean = event.action == MotionEvent.ACTION_UP
@@ -213,34 +240,41 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         }
     }
 
+    /**
+     * Create radio buttons programmatically below the existing Radio Group inside
+     * fragment_create.xml. This function will run following the list inside
+     * StaticObject.screenRouteList
+     */
     private fun createRadioButton() {
-        val availableScreen = SharedPrefFunction.AVAILABLE_SCREEN_IN_FLUTTER
-        Log.d("CreateFragment", "Keys are ${availableScreen.keys}")
-        Log.d("CreateFragment", "Size is ${availableScreen.size}")
-
         val radioGroup = requireView().findViewById<RadioGroup>(R.id.call_screen_radio_group)
-        val radioButtonArray = arrayOfNulls<RadioButton>(availableScreen.size)
-        var index = 0
 
-        availableScreen.forEach { screen ->
+        StaticObject.screenRouteList.forEach { screen ->
+            // Create resource id
             val resId = requireContext().resources.getIdentifier(
-                screen.key, "drawable", requireContext().packageName
+                screen.drawableName, "drawable", requireContext().packageName
             )
-            radioButtonArray[index] = RadioButton(requireContext()).apply {
+            val radioButton = RadioButton(requireContext()).apply {
+                id = resId
                 buttonDrawable = screenStateSelector(resId)
-                setPadding(0,0,10,0)
+                setPadding(0, 0, 10, 0)
             }
-            radioGroup.addView(radioButtonArray[index])
-            index++
+            radioGroup.addView(radioButton)
+            // Assign resId to screen
+            mapIdRoute[resId] = screen
         }
-
     }
 
+    /**
+     * This function will create selector programmatically without having to make xml
+     * for each selector manually. Through this selector, drawable will have a state between
+     * checked and not checked
+     */
     @Suppress("Deprecation")
-    fun screenStateSelector(bitmapId: Int): StateListDrawable {
+    private fun screenStateSelector(bitmapId: Int): StateListDrawable {
         val bitmap: Bitmap = BitmapFactory.decodeResource(resources, bitmapId)
         val scaledDownBitmap = Bitmap.createScaledBitmap(
-            bitmap, 300, 600, true)
+            bitmap, 300, 600, true
+        )
 
         val layer1 = BitmapDrawable(requireContext().resources, scaledDownBitmap)
         val layer2 = if (Build.VERSION.SDK_INT >= 23) {
@@ -262,10 +296,13 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         return res
     }
 
-    fun cancelImage() {
+    private fun cancelImage() {
         if (binding.cancelImage.visibility == View.VISIBLE) {
-            binding.contactPicture.setImageDrawable(ResourcesCompat.getDrawable(
-                resources, R.drawable.default_profile_picture, null))
+            binding.contactPicture.setImageDrawable(
+                ResourcesCompat.getDrawable(
+                    resources, R.drawable.default_profile_picture, null
+                )
+            )
             binding.cancelImage.visibility = View.INVISIBLE
 
             with(sharedPref.editor) {
@@ -276,20 +313,20 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
         }
     }
 
-    fun openImage() {
+    private fun openImage() {
         val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
         photoResultLauncher.launch(intent)
     }
 
-    fun openContact() {
+    private fun openContact() {
         requestContactPermissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
     }
 
-    fun scheduleCall() {
+    private fun scheduleCall() {
         ScheduleMenuFragment().show(parentFragmentManager, "ScheduleMenuFragment")
     }
 
-    fun createProfile() {
+    private fun createProfile() {
         // Put data from UI to sharedPref
         val sharedPref = SharedPrefFunction(requireContext())
 
@@ -298,31 +335,45 @@ class CreateFragment : Fragment(R.layout.fragment_create) {
          * Otherwise, use input string as value
          */
         fun checkBlank(input: String): String? {
-            println("Input string: $input")
             return if (input.isBlank() || input.isEmpty()) {
                 println("Input string is blank or empty")
                 null
             } else {
-                println("Input string is not blank or empty")
+                println("Input string is $input")
                 input
             }
         }
 
         with(sharedPref.editor) {
-            putString(SharedPrefFunction.ACTIVE_NAME, checkBlank(binding.contactName.text.toString()))
-            putString(SharedPrefFunction.ACTIVE_NUMBER, checkBlank(binding.contactNumber.text.toString()))
+            putString(
+                SharedPrefFunction.ACTIVE_NAME,
+                checkBlank(binding.contactName.text.toString())
+            )
+            putString(
+                SharedPrefFunction.ACTIVE_NUMBER,
+                checkBlank(binding.contactNumber.text.toString())
+            )
+            putString(SharedPrefFunction.ACTIVE_ROUTE, activeRouteValue)
             putString(SharedPrefFunction.IMAGE_BASE_64, sharedPref.tempImageBase64)
-//            putString(SharedPrefFunction.ACTIVE_ROUTE, checkBlank("/WhatsAppIncomingCall", sharedPref.activeRoute))
             apply()
         }
 
-        if (model.mainScheduleText.value == "Now" || model.mainScheduleText.value == "Schedule Call") {
-            Toast.makeText(requireContext(), "Please wait for 10 seconds", Toast.LENGTH_SHORT).show()
+        /**
+         * Start the AlarmService only if activeRouteValue is not null
+         * If null, then don't do anything, encourage the user to select one
+         */
+        if (activeRouteValue != null) {
+            if (model.mainScheduleText.value == "Now" || model.mainScheduleText.value == "Schedule Call") {
+                Toast.makeText(requireContext(), "Please wait for 10 seconds", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                Toast.makeText(requireContext(), "Profile created", Toast.LENGTH_SHORT).show()
+            }
+            startForegroundService(requireContext(), intentFunction.alarmServiceIntent)
         } else {
-            Toast.makeText(requireContext(), "Profile created", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Please select a call screen", Toast.LENGTH_SHORT)
+                .show()
         }
 
-        // Start AlarmService
-        startForegroundService(requireContext(), intentFunction.alarmServiceIntent)
     }
 }

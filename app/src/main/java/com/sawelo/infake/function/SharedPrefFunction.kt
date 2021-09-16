@@ -2,7 +2,8 @@ package com.sawelo.infake.function
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.sawelo.infake.ScheduleData
+import android.util.Log
+import com.sawelo.infake.dataClass.ScheduleData
 
 class SharedPrefFunction(context: Context) {
     companion object {
@@ -20,11 +21,8 @@ class SharedPrefFunction(context: Context) {
         const val RELATIVE_SECOND = "RELATIVE_SECOND"
 
         const val TIMER_TYPE = "TIMER_TYPE"
-
-        val AVAILABLE_SCREEN_IN_FLUTTER = mapOf(
-            "first_whatsapp" to "/FirstWhatsAppIncomingCall",
-            "second_whatsapp" to "/SecondWhatsAppIncomingCall")
     }
+
     private val bitmapFunction = BitmapFunction(context)
     private val sharedPref: SharedPreferences = context.getSharedPreferences(
             "PREFERENCE_FILE_KEY", Context.MODE_PRIVATE)
@@ -34,10 +32,11 @@ class SharedPrefFunction(context: Context) {
     // Retrieve data from sharedPref
     val activeName= sharedPref.getString(ACTIVE_NAME, "Citra") ?: "Citra"
     val activeNumber = sharedPref.getString(ACTIVE_NUMBER, "0123456789") ?: "0123456789"
-    val activeRoute = sharedPref.getString(ACTIVE_ROUTE, "/InitialRoute") ?: "/InitialRoute"
+
+    val activeIncomingRouteName = sharedPref.getString(ACTIVE_ROUTE, "/InitialRoute") ?: "/InitialRoute"
+
     val imageBase64 = sharedPref.getString(IMAGE_BASE_64, bitmapFunction.returnDefault()) ?: bitmapFunction.returnDefault()
     val tempImageBase64 = sharedPref.getString(TEMP_IMAGE_BASE_64, bitmapFunction.returnDefault()) ?: bitmapFunction.returnDefault()
-
 
     val specificHour = sharedPref.getInt(SPECIFIC_HOUR, 0)
     val specificMinute = sharedPref.getInt(SPECIFIC_MINUTE, 0)
@@ -48,10 +47,18 @@ class SharedPrefFunction(context: Context) {
 
     val timerType = sharedPref.getBoolean(TIMER_TYPE, true)
 
-    val scheduleData: ScheduleData =
-        if (timerType) {
-            ScheduleData(true, relativeHour, relativeMinute, relativeSecond)
+    fun scheduleData(): ScheduleData {
+        Log.d("SharedPrefFunction", "timerType is $timerType")
+        return if (timerType) {
+            ScheduleData(
+                true,
+                relativeHour = relativeHour,
+                relativeMinute = relativeMinute,
+                relativeSecond = relativeSecond)
         } else {
-            ScheduleData(false, specificHour, specificMinute)
+            ScheduleData(false,
+                specificHour = specificHour,
+                specificMinute = specificMinute)
+        }
     }
 }

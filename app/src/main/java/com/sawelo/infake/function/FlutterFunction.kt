@@ -2,7 +2,7 @@ package com.sawelo.infake.function
 
 import android.content.Context
 import android.util.Log
-import com.sawelo.infake.ContactData
+import com.sawelo.infake.dataClass.ContactData
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -18,12 +18,11 @@ class FlutterFunction (context: Context) {
     private val mContext = context
     private val intentFunction = IntentFunction(mContext)
 
+    /**
+     * This function will only run if flutterEngine is null
+     * Otherwise, use existing flutterEngineCache
+     */
     fun createFlutterEngine() {
-        /**
-         * This function will only run if flutterEngine is null
-         * Otherwise, use existing flutterEngineCache
-         */
-
         if (flutterEngine == null) {
             Log.d("FlutterFunction", "Flutter Engine is null")
 
@@ -47,11 +46,11 @@ class FlutterFunction (context: Context) {
             Log.d("FlutterFunction", "Flutter Engine is not null")
     }
 
+    /**
+     * This should only be used within CallActivity to avoid redundant calls
+     * Through this function, user ContactData will be sent to Flutter to be processed
+     */
     fun sendContactToFlutter(contactData: ContactData) {
-        /**
-         * This should only be used within CallActivity to avoid redundant calls
-         */
-
         val arguments = mutableMapOf<String, String>()
         arguments["name"] = contactData.name
         arguments["number"] = contactData.number
@@ -69,6 +68,11 @@ class FlutterFunction (context: Context) {
         }
     }
 
+    /**
+     * With this function, Android will be able to prepare for cancel method call from Flutter
+     * If called, intentFunction.cancelMethod will be called to stop all services except
+     * flutterEngine, therefore stopping notification from running
+     */
     private fun getCancelMethodFromFlutter() {
         if (flutterEngine != null) {
             MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, PLATFORM_CHANNEL)
